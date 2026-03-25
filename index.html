@@ -40,31 +40,28 @@
         .back-btn { background: var(--color-rojo); color: white; border: none; padding: 5px; font-family: 'Press Start 2P'; font-size: 0.3rem; cursor: pointer; margin-bottom: 10px; }
         .game-title { color: var(--color-oro); font-size: 0.6rem; margin-bottom: 15px; }
 
-        /* --- ESTILOS: ADIVINA EL PERSONAJE --- */
         input { width: 80%; padding: 10px; margin: 10px 0; font-family: 'Press Start 2P'; font-size: 12px; background: #222; color: #fff; border: 2px solid var(--color-oro); }
         .hint-text { color: #0f0; font-size: 10px; min-height: 80px; text-align: left; line-height: 1.6; border: 1px solid #333; padding: 5px; background: #111;}
         .control-btn { background: var(--color-amarillo); border: none; padding: 10px; font-family: 'Press Start 2P'; font-size: 0.35rem; cursor: pointer; margin: 5px; box-shadow: 3px 3px 0px #000; }
 
-        /* --- ESTILOS: MEMORAMA --- */
         #memory-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; margin-top: 10px; }
         .card { 
             background: var(--color-madera); height: 70px; 
             border-radius: 8px; border: 2px solid white;
             cursor: pointer; display: flex; align-items: center; justify-content: center; 
             font-size: 0.3rem; color: transparent; text-align: center;
-            transition: transform 0.3s;
+            transition: transform 0.3s; overflow: hidden;
         }
         .card.flipped { background: var(--color-crema); color: var(--color-cafe); transform: rotateY(180deg); border: 2px solid var(--color-oro); }
-        .card.matched { background: var(--color-verde); color: white; border: 2px solid #0f0; cursor: default; }
+        .card.matched { background: #80B0A4; color: white; border: 2px solid #0f0; cursor: default; }
 
-        /* --- ESTILOS: PUZZLE DESLIZANTE --- */
         #puzzle-grid { 
             display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; 
             width: 300px; height: 300px; margin: 10px auto; 
             background: #333; border: 2px solid var(--color-oro);
         }
         .puzzle-piece { 
-            background-size: 300px 300px; /* Tamaño total de la imagen */
+            background-size: 300px 300px; 
             border: 1px solid rgba(255,255,255,0.3);
             cursor: pointer;
         }
@@ -112,74 +109,64 @@
     </div>
 
 <script>
-    // --- VARIABLES DE ESTADO Y ENLACES ---
-    
-    // REEMPLAZA ESTOS ENLACES POR TUS CSV CORRESPONDIENTES
-    const URL_TRIVIA = 'TU_URL_CSV_HOJA_TRIVIA'; 
-    const URL_MURALES = 'TU_URL_CSV_HOJA_PRINCIPAL_MURALES'; // Usamos la misma base que la TV
+    // --- ENLACE UNIFICADO ---
+    const URL_DATA = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSTPf6KsrFzsD6zY57ugk3fiqixmZKtIXauOM8x16xQZq-5gY_HzlNmM1EYk9QtnGmaBJQvQf3walml/pub?output=csv';
 
-    // Datos globales
     let triviaData = [];
     let muralesData = [];
 
-    // --- CARGA INICIAL DE DATOS ---
     async function loadAllGamesData() {
         try {
-            // Carga Trivia (Adivina Personaje)
-            const resT = await fetch(URL_TRIVIA);
-            const csvT = await resT.text();
-            processTriviaCSV(csvT);
-
-            // Carga Murales (para Memorama y Puzzle)
-            const resM = await fetch(URL_MURALES);
-            const csvM = await resM.text();
-            processMuralesCSV(csvM);
-
-            console.log("Datos cargados. Trivias:", triviaData.length, "Murales:", muralesData.length);
+            const res = await fetch(URL_DATA);
+            const csv = await res.text();
+            const rows = csv.split(/\r?\n/).filter(r => r.trim() !== "").slice(2);
+            
+            processData(rows);
+            console.log("Carga exitosa. Trivias:", triviaData.length, "Murales:", muralesData.length);
         } catch (e) { console.error("Error cargando juegos:", e); }
     }
 
-    // --- PROCESADORES CSV ---
-    const cleanCSV = (v) => v ? v.replace(/^"|"$/g, "").trim() : "";
+    const clean = (v) => v ? v.replace(/^"|"$/g, "").trim() : "";
 
-    function processTriviaCSV(csv) {
-        const rows = csv.split(/\r?\n/).filter(r => r.trim() !== "").slice(2);
+    function processData(rows) {
         triviaData = [];
-        for (let i = 0; i < rows.length; i += 5) {
-            let chunk = rows.slice(i, i + 5);
-            if (chunk.length === 5) {
-                triviaData.push({
-                    pistas: chunk.map(r => cleanCSV(r.split(',')[0])), // Col A
-                    respuesta: cleanCSV(chunk[0].split(',')[1]) // Col B
-                });
-            }
-        }
-    }
+        muralesData = [];
+        let currentTrivia = null;
 
-    function processMuralesCSV(csv) {
-        const rows = csv.split(/\r?\n/).filter(r => r.trim() !== "").slice(2);
-        muralesData = rows.map(row => {
+        rows.forEach((row, i) => {
             const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
-            return {
-                titulo: cleanCSV(cols[1]), // Col B
-                imagen: convertDriveLink(cleanCSV(cols[5])) // Col F (Google Drive Link)
-            };
-        }).filter(m => m.imagen.includes('http')); // Solo guardamos los que tienen imagen válida
+            
+            // 1. Procesar Murales (Columnas B=1 y F=5)
+            const tituloMural = clean(cols[1]);
+            const imgMural = convertDriveLink(clean(cols[5]));
+            if(tituloMural && imgMural.includes('http')) {
+                muralesData.push({ titulo: tituloMural, imagen: imgMural });
+            }
+
+            // 2. Procesar Trivia (Columnas L=11 y O=14)
+            const pista = clean(cols[11]);
+            const respuesta = clean(cols[14]);
+            if(respuesta !== "") {
+                if(!currentTrivia || currentTrivia.respuesta !== respuesta) {
+                    currentTrivia = { respuesta: respuesta, pistas: [] };
+                    triviaData.push(currentTrivia);
+                }
+                if(pista !== "" && currentTrivia.pistas.length < 5) {
+                    currentTrivia.pistas.push(pista);
+                }
+            }
+        });
     }
 
-    // UTILERÍA: Convierte enlace de Drive Sharing a Enlace Directo
     function convertDriveLink(url) {
         if (url.includes('drive.google.com') && url.includes('id=')) {
-            const id = url.split('id=')[1];
+            const id = url.split('id=')[1].split('&')[0];
             return `https://drive.google.com/uc?export=view&id=${id}`;
         }
-        return url; // Si ya es directo o no es de Drive, lo deja igual
+        return url;
     }
 
-    // --- LÓGICA DEL MENÚ ---
     function showMenu() {
-        // Detener audios de trivia si los hay
-        window.speechSynthesis.cancel();
         document.getElementById('main-menu').style.display = 'block';
         document.querySelectorAll('.game-section').forEach(s => s.style.display = 'none');
     }
@@ -187,34 +174,28 @@
     function showGame(gameType) {
         document.getElementById('main-menu').style.display = 'none';
         document.getElementById(`game-${gameType}`).style.display = 'block';
-        
-        // Inicializar el juego correspondiente
         if(gameType === 'trivia') initTrivia();
         if(gameType === 'memory') initMemory();
         if(gameType === 'puzzle') initPuzzle();
     }
 
-    // ==========================================
-    // JUEGO 1: ADIVINA EL PERSONAJE (Lógica Base)
-    // ==========================================
-    let currentTrivia;
-    let triviaHintIdx;
-
+    // --- LÓGICA JUEGOS ---
+    let curTrivia, hintIdx;
     function initTrivia() {
-        if(triviaData.length === 0) return alert("No hay datos de trivia.");
-        currentTrivia = triviaData[Math.floor(Math.random() * triviaData.length)];
-        triviaHintIdx = 0;
-        document.getElementById('trivia-hints').innerHTML = `• Pista 1: ${currentTrivia.pistas[0]}`;
+        if(triviaData.length === 0) return alert("Sin datos.");
+        curTrivia = triviaData[Math.floor(Math.random() * triviaData.length)];
+        hintIdx = 0;
+        document.getElementById('trivia-hints').innerHTML = `• Pista 1: ${curTrivia.pistas[0]}`;
         document.getElementById('btn-next-hint').disabled = false;
         document.getElementById('btn-next-hint').style.opacity = "1";
         document.getElementById('trivia-answer').value = "";
     }
 
     function revealNextHint() {
-        if(triviaHintIdx < 4) {
-            triviaHintIdx++;
-            document.getElementById('trivia-hints').innerHTML += `<br>• Pista ${triviaHintIdx+1}: ${currentTrivia.pistas[triviaHintIdx]}`;
-            if(triviaHintIdx === 4) {
+        if(hintIdx < curTrivia.pistas.length - 1) {
+            hintIdx++;
+            document.getElementById('trivia-hints').innerHTML += `<br>• Pista ${hintIdx+1}: ${curTrivia.pistas[hintIdx]}`;
+            if(hintIdx === curTrivia.pistas.length - 1) {
                 document.getElementById('btn-next-hint').disabled = true;
                 document.getElementById('btn-next-hint').style.opacity = "0.5";
             }
@@ -223,155 +204,76 @@
 
     function checkTrivia() {
         const guess = document.getElementById('trivia-answer').value.trim().toLowerCase();
-        if(guess === currentTrivia.respuesta.toLowerCase()) {
-            alert("¡CORRECTO! ERES UN EXPERTO.");
-            initTrivia(); // Siguiente personaje
-        } else {
-            alert("INCORRECTO. ¡SIGUE INTENTANDO!");
-        }
+        if(guess === curTrivia.respuesta.toLowerCase()) {
+            alert("¡CORRECTO!");
+            initTrivia();
+        } else { alert("INTENTA DE NUEVO"); }
     }
 
-    // ==========================================
-    // JUEGO 2: MEMORAMA (Base - Texto vs Texto)
-    // ==========================================
-    // NOTA: Para no complicar al museo pidiendo fotos de cartas, usaremos Parejas de Títulos.
-    let memoryCards = [];
-    let flippedCards = [];
-    let matchesFound = 0;
-
+    let flipped = [], matches = 0;
     function initMemory() {
-        if(muralesData.length < 6) return alert("Se necesitan al menos 6 murales para jugar.");
         const grid = document.getElementById('memory-grid');
-        grid.innerHTML = '';
-        matchesFound = 0;
-        flippedCards = [];
-
-        // Seleccionamos 6 murales al azar
-        let selection = [...muralesData].sort(() => 0.5 - Math.random()).slice(0, 6);
-        // Creamos parejas de títulos
-        let pairs = [...selection, ...selection].sort(() => 0.5 - Math.random());
-
-        pairs.forEach((mural, i) => {
-            const card = document.createElement('div');
-            card.className = 'card';
-            card.dataset.title = mural.titulo;
-            card.dataset.index = i;
-            card.innerText = mural.titulo; // Texto oculto inicialmente por CSS
-            card.onclick = flipCard;
-            grid.appendChild(card);
+        grid.innerHTML = ''; flipped = []; matches = 0;
+        let sel = [...muralesData].sort(() => 0.5 - Math.random()).slice(0, 6);
+        let pairs = [...sel, ...sel].sort(() => 0.5 - Math.random());
+        pairs.forEach(m => {
+            const c = document.createElement('div');
+            c.className = 'card'; c.dataset.title = m.titulo;
+            c.innerText = m.titulo; c.onclick = flip;
+            grid.appendChild(c);
         });
     }
 
-    function flipCard() {
-        if (flippedCards.length < 2 && !this.classList.contains('flipped') && !this.classList.contains('matched')) {
+    function flip() {
+        if (flipped.length < 2 && !this.classList.contains('flipped')) {
             this.classList.add('flipped');
-            flippedCards.push(this);
-
-            if (flippedCards.length === 2) {
-                setTimeout(checkMemoryMatch, 1000);
-            }
+            flipped.push(this);
+            if (flipped.length === 2) setTimeout(checkM, 1000);
         }
     }
 
-    function checkMemoryMatch() {
-        const [card1, card2] = flippedCards;
-        if (card1.dataset.title === card2.dataset.title) {
-            card1.classList.add('matched');
-            card2.classList.add('matched');
-            matchesFound++;
-            if (matchesFound === 6) {
-                alert("¡FELICIDADES! COMPLETADO.");
-                initMemory();
-            }
-        } else {
-            card1.classList.remove('flipped');
-            card2.classList.remove('flipped');
-        }
-        flippedCards = [];
+    function checkM() {
+        if (flipped[0].dataset.title === flipped[1].dataset.title) {
+            flipped.forEach(c => c.classList.add('matched'));
+            matches++;
+            if (matches === 6) alert("¡GANASTE!");
+        } else { flipped.forEach(c => c.classList.remove('flipped')); }
+        flipped = [];
     }
 
-    // ==========================================
-    // JUEGO 3: ROMPECABEZAS DESLIZANTE (Lógica CSS background-position)
-    // ==========================================
-    let puzzlePieces = [];
-    let emptyTileIdx = 8; // La última pieza (3x3 - index 8) será el hueco
-
+    let pPieces = [], eIdx = 8;
     function initPuzzle() {
-        if(muralesData.length === 0) return alert("No hay imágenes de murales.");
-        const grid = document.getElementById('puzzle-grid');
-        grid.innerHTML = '';
-        
-        // Elegimos un mural al azar
-        const mural = muralesData[Math.floor(Math.random() * muralesData.length)];
-        const imgUrl = mural.imagen;
-
-        // Creamos el array de posiciones (0 a 7 son piezas, 8 es hueco)
-        puzzlePieces = [...Array(8).keys()]; 
-        puzzlePieces.push('empty'); // Añadimos el hueco
-
-        // Desordenamos (Fisher-Yates shuffle simplificado)
-        puzzlePieces.sort(() => 0.5 - Math.random());
-        emptyTileIdx = puzzlePieces.indexOf('empty');
-
-        // Renderizamos las piezas
-        renderPuzzle(imgUrl);
+        const m = muralesData[Math.floor(Math.random() * muralesData.length)];
+        pPieces = [...Array(8).keys(), 'empty'].sort(() => 0.5 - Math.random());
+        eIdx = pPieces.indexOf('empty');
+        renderP(m.imagen);
     }
 
-    function renderPuzzle(imgUrl) {
-        const grid = document.getElementById('puzzle-grid');
-        grid.innerHTML = '';
-        puzzlePieces.forEach((pieceIdx, i) => {
-            const div = document.createElement('div');
-            div.className = 'puzzle-piece';
-            
-            if (pieceIdx === 'empty') {
-                div.classList.add('empty');
-            } else {
-                div.style.backgroundImage = `url(${imgUrl})`;
-                // Calculamos la posición del fondo para que muestre su "cachito" de imagen
-                // 3x3 grid = 100px por pieza (300px total)
-                const row = Math.floor(pieceIdx / 3);
-                const col = pieceIdx % 3;
-                div.style.backgroundPosition = `-${col * 100}px -${row * 100}px`;
-                div.onclick = () => movePuzzlePiece(i);
+    function renderP(url) {
+        const g = document.getElementById('puzzle-grid');
+        g.innerHTML = '';
+        pPieces.forEach((p, i) => {
+            const d = document.createElement('div');
+            d.className = 'puzzle-piece' + (p === 'empty' ? ' empty' : '');
+            if(p !== 'empty') {
+                d.style.backgroundImage = `url(${url})`;
+                d.style.backgroundPosition = `-${(p % 3) * 100}px -${Math.floor(p / 3) * 100}px`;
+                d.onclick = () => moveP(i, url);
             }
-            grid.appendChild(div);
+            g.appendChild(d);
         });
     }
 
-    function movePuzzlePiece(clickedIdx) {
-        // Verificamos si la pieza clicada está adyacente al hueco vacío
-        const adyacentes = [clickedIdx - 1, clickedIdx + 1, clickedIdx - 3, clickedIdx + 3];
-        
-        // Corrección de bordes (no saltar de fila en fila)
-        if (clickedIdx % 3 === 0) adyacentes[0] = -1; // Izquierda prohibida
-        if (clickedIdx % 3 === 2) adyacentes[1] = -1; // Derecha prohibida
-
-        if (adyacentes.includes(emptyTileIdx)) {
-            // Intercambiamos posiciones en el array
-            [puzzlePieces[clickedIdx], puzzlePieces[emptyTileIdx]] = [puzzlePieces[emptyTileIdx], puzzlePieces[clickedIdx]];
-            emptyTileIdx = clickedIdx;
-            
-            // Re-renderizamos con la misma imagen
-            const imgUrl = document.querySelector('.puzzle-piece:not(.empty)').style.backgroundImage.slice(5, -2);
-            renderPuzzle(imgUrl);
-            checkPuzzleWin();
+    function moveP(i, url) {
+        const ady = [i-1, i+1, i-3, i+3];
+        if (i%3 === 0) ady[0] = -1; if (i%3 === 2) ady[1] = -1;
+        if (ady.includes(eIdx)) {
+            [pPieces[i], pPieces[eIdx]] = [pPieces[eIdx], pPieces[i]];
+            eIdx = i; renderP(url);
+            if (pPieces.every((v, k) => v === 'empty' ? k === 8 : v === k)) alert("¡LOGRADO!");
         }
     }
 
-    function checkPuzzleWin() {
-        // Verificamos si las piezas están en orden 0, 1, 2, ..., 7, 'empty'
-        let win = true;
-        for (let i = 0; i < 8; i++) {
-            if (puzzlePieces[i] !== i) win = false;
-        }
-        if (win) {
-            alert("¡MURAL RESTAURADO! EXCELENTE TRABAJO.");
-            initPuzzle();
-        }
-    }
-
-    // Iniciamos la carga al abrir la página
     window.onload = loadAllGamesData;
 </script>
 </body>
