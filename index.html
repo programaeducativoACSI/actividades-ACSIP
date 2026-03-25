@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> Osaka Vision Pro - Consola de Juegos</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        /* --- ESTILOS RETRO GENERALES --- */
+        :root {
+            --color-rojo: #D04F2C; --color-amarillo: #D9AC36;
+            --color-cafe: #431E15; --color-crema: #fffaf0;
+            --color-oro: #FFD700; --color-madera: #8d6e63;
+        }
+
+        body { 
+            background: #1a1a1a; color: #fff; 
+            font-family: 'Press Start 2P', cursive; 
+            display: flex; flex-direction: column; align-items: center; 
+            min-height: 100vh; margin: 0; padding: 20px; 
+        }
+
+        /* --- MENÚ PRINCIPAL --- */
+        #main-menu { text-align: center; margin-top: 50px; }
+        .menu-title { font-size: 1rem; color: var(--color-rojo); text-shadow: 2px 2px #000; margin-bottom: 30px; }
+        .menu-btn { 
+            background: var(--color-madera); color: white; 
+            border: 4px solid var(--color-cafe); padding: 15px; 
+            font-family: 'Press Start 2P'; font-size: 0.5rem; 
+            cursor: pointer; width: 80%; max-width: 300px; 
+            margin: 10px auto; display: block; 
+            box-shadow: 5px 5px 0px #000; transition: all 0.2s;
+        }
+        .menu-btn:hover { background: var(--color-amarillo); color: var(--color-cafe); }
+
+        /* --- CONTENEDORES DE JUEGO --- */
+        .game-section { display: none; width: 95%; max-width: 500px; text-align: center; }
+        .retro-panel { border: 10px solid #5d4037; padding: 15px; background: #000; border-radius: 20px; box-shadow: 0 0 20px #000; }
+        
+        .back-btn { background: var(--color-rojo); color: white; border: none; padding: 5px; font-family: 'Press Start 2P'; font-size: 0.3rem; cursor: pointer; margin-bottom: 10px; }
+        .game-title { color: var(--color-oro); font-size: 0.6rem; margin-bottom: 15px; }
+
+        /* --- ESTILOS: ADIVINA EL PERSONAJE --- */
+        input { width: 80%; padding: 10px; margin: 10px 0; font-family: 'Press Start 2P'; font-size: 12px; background: #222; color: #fff; border: 2px solid var(--color-oro); }
+        .hint-text { color: #0f0; font-size: 10px; min-height: 80px; text-align: left; line-height: 1.6; border: 1px solid #333; padding: 5px; background: #111;}
+        .control-btn { background: var(--color-amarillo); border: none; padding: 10px; font-family: 'Press Start 2P'; font-size: 0.35rem; cursor: pointer; margin: 5px; box-shadow: 3px 3px 0px #000; }
+
+        /* --- ESTILOS: MEMORAMA --- */
+        #memory-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; margin-top: 10px; }
+        .card { 
+            background: var(--color-madera); height: 70px; 
+            border-radius: 8px; border: 2px solid white;
+            cursor: pointer; display: flex; align-items: center; justify-content: center; 
+            font-size: 0.3rem; color: transparent; text-align: center;
+            transition: transform 0.3s;
+        }
+        .card.flipped { background: var(--color-crema); color: var(--color-cafe); transform: rotateY(180deg); border: 2px solid var(--color-oro); }
+        .card.matched { background: var(--color-verde); color: white; border: 2px solid #0f0; cursor: default; }
+
+        /* --- ESTILOS: PUZZLE DESLIZANTE --- */
+        #puzzle-grid { 
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; 
+            width: 300px; height: 300px; margin: 10px auto; 
+            background: #333; border: 2px solid var(--color-oro);
+        }
+        .puzzle-piece { 
+            background-size: 300px 300px; /* Tamaño total de la imagen */
+            border: 1px solid rgba(255,255,255,0.3);
+            cursor: pointer;
+        }
+        .puzzle-piece.empty { background: white !important; cursor: default; }
+    </style>
+</head>
+<body>
+
+    <a href="index.html" style="position:fixed; top:10px; left:10px; color:var(--color-crema); text-decoration:none; font-size:0.4rem; z-index:1000;"><< TV</a>
+
+    <div id="main-menu">
+        <h1 class="menu-title">OSAKA 1969 - ARCADE</h1>
+        <button class="menu-btn" onclick="showGame('trivia')">1. ¿QUIÉN ES?</button>
+        <button class="menu-btn" onclick="showGame('memory')">2. MEMORAMA</button>
+        <button class="menu-btn" onclick="showGame('puzzle')">3. ROMPECABEZAS</button>
+    </div>
+
+    <div id="game-trivia" class="game-section">
+        <button class="back-btn" onclick="showMenu()">SALIR</button>
+        <div class="retro-panel">
+            <h2 class="game-title">¿QUIÉN ES?</h2>
+            <div id="trivia-hints" class="hint-text">Cargando pistas...</div>
+            <input type="text" id="trivia-answer" placeholder="TU RESPUESTA...">
+            <div>
+                <button class="control-btn" onclick="checkTrivia()">LISTO</button>
+                <button class="control-btn" id="btn-next-hint" onclick="revealNextHint()">+ PISTA</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="game-memory" class="game-section">
+        <button class="back-btn" onclick="showMenu()">SALIR</button>
+        <div class="retro-panel">
+            <h2 class="game-title">MEMORAMA</h2>
+            <div id="memory-grid"></div>
+        </div>
+    </div>
+
+    <div id="game-puzzle" class="game-section">
+        <button class="back-btn" onclick="showMenu()">SALIR</button>
+        <div class="retro-panel">
+            <h2 class="game-title">ROMPECABEZAS</h2>
+            <div id="puzzle-grid"></div>
+        </div>
+    </div>
+
+<script>
+    // --- VARIABLES DE ESTADO Y ENLACES ---
+    
+    // REEMPLAZA ESTOS ENLACES POR TUS CSV CORRESPONDIENTES
+    const URL_TRIVIA = 'TU_URL_CSV_HOJA_TRIVIA'; 
+    const URL_MURALES = 'TU_URL_CSV_HOJA_PRINCIPAL_MURALES'; // Usamos la misma base que la TV
+
+    // Datos globales
+    let triviaData = [];
+    let muralesData = [];
+
+    // --- CARGA INICIAL DE DATOS ---
+    async function loadAllGamesData() {
+        try {
+            // Carga Trivia (Adivina Personaje)
+            const resT = await fetch(URL_TRIVIA);
+            const csvT = await resT.text();
+            processTriviaCSV(csvT);
+
+            // Carga Murales (para Memorama y Puzzle)
+            const resM = await fetch(URL_MURALES);
+            const csvM = await resM.text();
+            processMuralesCSV(csvM);
+
+            console.log("Datos cargados. Trivias:", triviaData.length, "Murales:", muralesData.length);
+        } catch (e) { console.error("Error cargando juegos:", e); }
+    }
+
+    // --- PROCESADORES CSV ---
+    const cleanCSV = (v) => v ? v.replace(/^"|"$/g, "").trim() : "";
+
+    function processTriviaCSV(csv) {
+        const rows = csv.split(/\r?\n/).filter(r => r.trim() !== "").slice(2);
+        triviaData = [];
+        for (let i = 0; i < rows.length; i += 5) {
+            let chunk = rows.slice(i, i + 5);
+            if (chunk.length === 5) {
+                triviaData.push({
+                    pistas: chunk.map(r => cleanCSV(r.split(',')[0])), // Col A
+                    respuesta: cleanCSV(chunk[0].split(',')[1]) // Col B
+                });
+            }
+        }
+    }
+
+    function processMuralesCSV(csv) {
+        const rows = csv.split(/\r?\n/).filter(r => r.trim() !== "").slice(2);
+        muralesData = rows.map(row => {
+            const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+            return {
+                titulo: cleanCSV(cols[1]), // Col B
+                imagen: convertDriveLink(cleanCSV(cols[5])) // Col F (Google Drive Link)
+            };
+        }).filter(m => m.imagen.includes('http')); // Solo guardamos los que tienen imagen válida
+    }
+
+    // UTILERÍA: Convierte enlace de Drive Sharing a Enlace Directo
+    function convertDriveLink(url) {
+        if (url.includes('drive.google.com') && url.includes('id=')) {
+            const id = url.split('id=')[1];
+            return `https://drive.google.com/uc?export=view&id=${id}`;
+        }
+        return url; // Si ya es directo o no es de Drive, lo deja igual
+    }
+
+    // --- LÓGICA DEL MENÚ ---
+    function showMenu() {
+        // Detener audios de trivia si los hay
+        window.speechSynthesis.cancel();
+        document.getElementById('main-menu').style.display = 'block';
+        document.querySelectorAll('.game-section').forEach(s => s.style.display = 'none');
+    }
+
+    function showGame(gameType) {
+        document.getElementById('main-menu').style.display = 'none';
+        document.getElementById(`game-${gameType}`).style.display = 'block';
+        
+        // Inicializar el juego correspondiente
+        if(gameType === 'trivia') initTrivia();
+        if(gameType === 'memory') initMemory();
+        if(gameType === 'puzzle') initPuzzle();
+    }
+
+    // ==========================================
+    // JUEGO 1: ADIVINA EL PERSONAJE (Lógica Base)
+    // ==========================================
+    let currentTrivia;
+    let triviaHintIdx;
+
+    function initTrivia() {
+        if(triviaData.length === 0) return alert("No hay datos de trivia.");
+        currentTrivia = triviaData[Math.floor(Math.random() * triviaData.length)];
+        triviaHintIdx = 0;
+        document.getElementById('trivia-hints').innerHTML = `• Pista 1: ${currentTrivia.pistas[0]}`;
+        document.getElementById('btn-next-hint').disabled = false;
+        document.getElementById('btn-next-hint').style.opacity = "1";
+        document.getElementById('trivia-answer').value = "";
+    }
+
+    function revealNextHint() {
+        if(triviaHintIdx < 4) {
+            triviaHintIdx++;
+            document.getElementById('trivia-hints').innerHTML += `<br>• Pista ${triviaHintIdx+1}: ${currentTrivia.pistas[triviaHintIdx]}`;
+            if(triviaHintIdx === 4) {
+                document.getElementById('btn-next-hint').disabled = true;
+                document.getElementById('btn-next-hint').style.opacity = "0.5";
+            }
+        }
+    }
+
+    function checkTrivia() {
+        const guess = document.getElementById('trivia-answer').value.trim().toLowerCase();
+        if(guess === currentTrivia.respuesta.toLowerCase()) {
+            alert("¡CORRECTO! ERES UN EXPERTO.");
+            initTrivia(); // Siguiente personaje
+        } else {
+            alert("INCORRECTO. ¡SIGUE INTENTANDO!");
+        }
+    }
+
+    // ==========================================
+    // JUEGO 2: MEMORAMA (Base - Texto vs Texto)
+    // ==========================================
+    // NOTA: Para no complicar al museo pidiendo fotos de cartas, usaremos Parejas de Títulos.
+    let memoryCards = [];
+    let flippedCards = [];
+    let matchesFound = 0;
+
+    function initMemory() {
+        if(muralesData.length < 6) return alert("Se necesitan al menos 6 murales para jugar.");
+        const grid = document.getElementById('memory-grid');
+        grid.innerHTML = '';
+        matchesFound = 0;
+        flippedCards = [];
+
+        // Seleccionamos 6 murales al azar
+        let selection = [...muralesData].sort(() => 0.5 - Math.random()).slice(0, 6);
+        // Creamos parejas de títulos
+        let pairs = [...selection, ...selection].sort(() => 0.5 - Math.random());
+
+        pairs.forEach((mural, i) => {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.dataset.title = mural.titulo;
+            card.dataset.index = i;
+            card.innerText = mural.titulo; // Texto oculto inicialmente por CSS
+            card.onclick = flipCard;
+            grid.appendChild(card);
+        });
+    }
+
+    function flipCard() {
+        if (flippedCards.length < 2 && !this.classList.contains('flipped') && !this.classList.contains('matched')) {
+            this.classList.add('flipped');
+            flippedCards.push(this);
+
+            if (flippedCards.length === 2) {
+                setTimeout(checkMemoryMatch, 1000);
+            }
+        }
+    }
+
+    function checkMemoryMatch() {
+        const [card1, card2] = flippedCards;
+        if (card1.dataset.title === card2.dataset.title) {
+            card1.classList.add('matched');
+            card2.classList.add('matched');
+            matchesFound++;
+            if (matchesFound === 6) {
+                alert("¡FELICIDADES! COMPLETADO.");
+                initMemory();
+            }
+        } else {
+            card1.classList.remove('flipped');
+            card2.classList.remove('flipped');
+        }
+        flippedCards = [];
+    }
+
+    // ==========================================
+    // JUEGO 3: ROMPECABEZAS DESLIZANTE (Lógica CSS background-position)
+    // ==========================================
+    let puzzlePieces = [];
+    let emptyTileIdx = 8; // La última pieza (3x3 - index 8) será el hueco
+
+    function initPuzzle() {
+        if(muralesData.length === 0) return alert("No hay imágenes de murales.");
+        const grid = document.getElementById('puzzle-grid');
+        grid.innerHTML = '';
+        
+        // Elegimos un mural al azar
+        const mural = muralesData[Math.floor(Math.random() * muralesData.length)];
+        const imgUrl = mural.imagen;
+
+        // Creamos el array de posiciones (0 a 7 son piezas, 8 es hueco)
+        puzzlePieces = [...Array(8).keys()]; 
+        puzzlePieces.push('empty'); // Añadimos el hueco
+
+        // Desordenamos (Fisher-Yates shuffle simplificado)
+        puzzlePieces.sort(() => 0.5 - Math.random());
+        emptyTileIdx = puzzlePieces.indexOf('empty');
+
+        // Renderizamos las piezas
+        renderPuzzle(imgUrl);
+    }
+
+    function renderPuzzle(imgUrl) {
+        const grid = document.getElementById('puzzle-grid');
+        grid.innerHTML = '';
+        puzzlePieces.forEach((pieceIdx, i) => {
+            const div = document.createElement('div');
+            div.className = 'puzzle-piece';
+            
+            if (pieceIdx === 'empty') {
+                div.classList.add('empty');
+            } else {
+                div.style.backgroundImage = `url(${imgUrl})`;
+                // Calculamos la posición del fondo para que muestre su "cachito" de imagen
+                // 3x3 grid = 100px por pieza (300px total)
+                const row = Math.floor(pieceIdx / 3);
+                const col = pieceIdx % 3;
+                div.style.backgroundPosition = `-${col * 100}px -${row * 100}px`;
+                div.onclick = () => movePuzzlePiece(i);
+            }
+            grid.appendChild(div);
+        });
+    }
+
+    function movePuzzlePiece(clickedIdx) {
+        // Verificamos si la pieza clicada está adyacente al hueco vacío
+        const adyacentes = [clickedIdx - 1, clickedIdx + 1, clickedIdx - 3, clickedIdx + 3];
+        
+        // Corrección de bordes (no saltar de fila en fila)
+        if (clickedIdx % 3 === 0) adyacentes[0] = -1; // Izquierda prohibida
+        if (clickedIdx % 3 === 2) adyacentes[1] = -1; // Derecha prohibida
+
+        if (adyacentes.includes(emptyTileIdx)) {
+            // Intercambiamos posiciones en el array
+            [puzzlePieces[clickedIdx], puzzlePieces[emptyTileIdx]] = [puzzlePieces[emptyTileIdx], puzzlePieces[clickedIdx]];
+            emptyTileIdx = clickedIdx;
+            
+            // Re-renderizamos con la misma imagen
+            const imgUrl = document.querySelector('.puzzle-piece:not(.empty)').style.backgroundImage.slice(5, -2);
+            renderPuzzle(imgUrl);
+            checkPuzzleWin();
+        }
+    }
+
+    function checkPuzzleWin() {
+        // Verificamos si las piezas están en orden 0, 1, 2, ..., 7, 'empty'
+        let win = true;
+        for (let i = 0; i < 8; i++) {
+            if (puzzlePieces[i] !== i) win = false;
+        }
+        if (win) {
+            alert("¡MURAL RESTAURADO! EXCELENTE TRABAJO.");
+            initPuzzle();
+        }
+    }
+
+    // Iniciamos la carga al abrir la página
+    window.onload = loadAllGamesData;
+</script>
+</body>
+</html>
