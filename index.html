@@ -149,16 +149,23 @@
         } catch(e) { console.error("Error de carga:", e); }
     }
 
-    function convert(url) {
-        if (!url || !url.includes('drive.google.com')) return url;
-        let id = "";
-        if (url.includes('id=')) {
-            id = url.split('id=')[1].split('&')[0];
-        } else if (url.includes('/file/d/')) {
-            id = url.split('/file/d/')[1].split('/')[0];
-        }
-        return id ? `https://drive.google.com/uc?export=view&id=${id}` : url;
+  function convert(url) {
+    if (!url || !url.includes('drive.google.com')) return url;
+    
+    let id = "";
+    // Caso 1: Enlaces con id=
+    if (url.includes('id=')) {
+        id = url.split('id=')[1].split('&')[0];
+    } 
+    // Caso 2: Enlaces tipo /file/d/ID/view
+    else if (url.includes('/file/d/')) {
+        // Extraemos lo que hay entre /d/ y el siguiente /
+        id = url.split('/file/d/')[1].split('/')[0].split('?')[0];
     }
+    
+    // Usamos el formato de previsualización que es el más estable actualmente
+    return id ? `https://lh3.googleusercontent.com/u/0/d/${id}` : url;
+}
 
     function showHome() {
         document.getElementById('main-menu').style.display = 'block';
