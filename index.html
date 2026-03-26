@@ -78,31 +78,46 @@
     let poolTrivia = [], poolMemory = [], poolPuzzle = [];
     let curObj, curHintIdx = 0;
 
-    async function init() {
+  async function init() {
         try {
-            const res = await fetch(URL_DINAMICAS);
+            const res = await fetch(URL_DATA_UNIFICADA + '&cache=' + Date.now()); // Evitamos caché
             const csv = await res.text();
             const rows = csv.split(/\r?\n/).filter(r => r.trim() !== "").slice(1);
             
             const clean = (v) => v ? v.replace(/^"|"$/g, "").trim() : "";
 
-            // --- 1. CONFIGURACIÓN DE COLORES (Fila 2 - Índice 0 de rows) ---
+            // --- 1. CONFIGURACIÓN VISUAL (Fila 2) ---
             const cfg = rows[0].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+            
+            // Colores de fondo y título
             document.body.style.backgroundColor = clean(cfg[6]); // G2
             document.getElementById('titulo-principal').style.color = clean(cfg[7]); // H2
             
-            const btns = document.querySelectorAll('.btn-game');
+            // Colores de botones (I2 y J2)
+            const colorTxtBtn = clean(cfg[8]);
+            const colorBgBtn = clean(cfg[9]);
+            const btns = document.querySelectorAll('.btn-game, .control-btn, .back-btn');
             btns.forEach(b => {
-                b.style.color = clean(cfg[8]); // I2
-                b.style.backgroundColor = clean(cfg[9]); // J2
+                b.style.color = colorTxtBtn;
+                b.style.backgroundColor = colorBgBtn;
             });
-            document.getElementById('btn-regresar').innerText = clean(cfg[10]) || "VOLVER"; // K2
 
-            // --- 2. PROCESAMIENTO DE JUEGOS ---
-            rows.forEach((row, i) => {
+            // Texto del botón regresar (K2)
+            document.getElementById('btn-regresar').innerText = clean(cfg[10]) || "VOLVER";
+
+            // COLOR DE INSTRUCCIONES Y PISTAS (L2)
+            const colorInstrucciones = clean(cfg[11]);
+            // Aplicamos a todos los contenedores de texto que no son botones
+            const textos = document.querySelectorAll('#hintBox, .hint-text, .instruccion-txt, #view-trivia div');
+            textos.forEach(t => {
+                if(!t.classList.contains('btn-game')) t.style.color = colorInstrucciones;
+            });
+
+            // --- 2. PROCESAMIENTO DE FILAS ---
+            rows.forEach((row) => {
                 const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
                 
-                // Trivia (Col A y B)
+                // Trivia (A y B)
                 const p = clean(cols[0]), r = clean(cols[1]);
                 if(r) {
                     let t = poolTrivia.find(x => x.res === r);
@@ -110,20 +125,29 @@
                     if(p) t.pistas.push(p);
                 }
 
-                // Memorama (Col C y D)
+                // Memorama (C y D)
                 const imgM = clean(cols[2]), txtM = clean(cols[3]);
                 if(imgM && txtM) poolMemory.push({ img: convert(imgM), txt: txtM });
 
-                // Puzzle (Col E)
+                // Puzzle (E)
                 const imgP = clean(cols[4]);
                 if(imgP) poolPuzzle.push(convert(imgP));
             });
-        } catch(e) { console.error(e); }
-    }
 
+            console.log("Sistema listo.");
+        } catch(e) { console.error("Error de carga:", e); }
+    }
     function convert(url) {
-        if (url.includes('id=')) return `https://drive.google.com/uc?export=view&id=${url.split('id=')[1].split('&')[0]}`;
-        return url;
+        if (!url || !url.includes('drive.google.com')) return url;
+        
+        let id = "";
+        if (url.includes('id=')) {
+            id = url.split('id=')[1].split('&')[0];
+        } else if (url.includes('/file/d/')) {
+            id = url.split('/file/d/')[1].split('/')[0];
+        }
+        
+        return id ? `https://drive.google.com/uc?export=view&id=${id}` : url;
     }
 
     function showHome() {
