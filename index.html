@@ -19,7 +19,7 @@
             border: none; cursor: pointer; font-family: 'Press Start 2P';
             font-size: 0.5rem; box-shadow: 4px 4px 0px #000;
         }
-        .back-link { position: fixed; top: 15px; left: 15px; text-decoration: none; font-size: 0.4rem; padding: 5px; border-radius: 5px; }
+        .back-link { position: fixed; top: 20px; left: 20px; text-decoration: none; font-size: 0.6rem; padding: 15px; border-radius: 2px; }
 
         .panel { border: 6px solid #000; padding: 20px; background: rgba(0,0,0,0.1); border-radius: 10px; }
         #hintBox { font-size: 0.4rem; text-align: left; line-height: 1.8; margin-bottom: 15px; }
@@ -148,23 +148,23 @@
 
     async function init() {
         try {
-            // Carga de datos con anti-caché
+            
             const res = await fetch(URL_DINAMICAS + '&cache=' + Date.now()); 
             const csv = await res.text();
             
-            // Separamos filas y quitamos encabezado (fila 1)
+            
             const rows = csv.split(/\r?\n/).filter(r => r.trim() !== "").slice(1);
             const clean = (v) => v ? v.replace(/^"|"$/g, "").trim() : "";
 
-            // --- 1. CONFIGURACIÓN VISUAL (Leemos de la fila 2 / rows[0]) ---
+            
             const cfg = rows[0].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
             
-            // Colores de fondo y título
+            
             document.body.style.backgroundColor = clean(cfg[6]); // G2
             const titulo = document.getElementById('titulo-principal');
             if(titulo) titulo.style.color = clean(cfg[7]); // H2
             
-            // Colores de botones (I2 y J2)
+           
             const colorTxtBtn = clean(cfg[8]);
             const colorBgBtn = clean(cfg[9]);
             const btns = document.querySelectorAll('.btn-game, .control-btn, .back-btn, .back-link');
@@ -173,14 +173,14 @@
                 b.style.backgroundColor = colorBgBtn;
             });
 
-            // Texto del botón regresar (K2)
+            
             const btnRegresar = document.getElementById('btn-regresar');
             if(btnRegresar) btnRegresar.innerText = clean(cfg[10]) || "VOLVER";
 
-            // COLOR DE INSTRUCCIONES Y PISTAS (L2)
+            
             colorInstrucciones = clean(cfg[11]);
 
-            // --- 2. PROCESAMIENTO DE DATOS (A partir de la fila 2) ---
+            
             // Limpiamos los pools antes de llenar para evitar duplicados si re-cargamos
             poolTrivia = []; poolMemory = []; poolPuzzle = [];
             
