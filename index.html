@@ -25,33 +25,63 @@
         #hintBox { font-size: 0.4rem; text-align: left; line-height: 1.8; margin-bottom: 15px; }
         input { width: 80%; padding: 10px; font-family: 'Press Start 2P'; font-size: 0.5rem; margin-bottom: 10px; }
         
-        #memory-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-       .card { 
-            height: 90px; 
-            background: #333; /* Color de la carta "boca abajo" */
-            cursor: pointer; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            border: 2px solid #fff; 
-            overflow: hidden; 
-            position: relative;
-        }
-        .card img, .card span { 
-            display: none; /* Ocultos por defecto */
-        }
-        .card.flipped img, .card.flipped span { 
-            display: block; /* Se muestran al voltear */
-        }
-        .card span {
-            font-size: 0.25rem;
-            padding: 5px;
-            text-align: center;
-        }
+      #memory-grid { 
+    display: grid; 
+    grid-template-columns: repeat(3, 1fr); 
+    gap: 15px; 
+    padding: 10px;
+}
 
-        #puzzle-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; width: 300px; height: 300px; margin: 0 auto; border: 4px solid #000; }
-        .tile { background-size: 300px 300px; cursor: pointer; border: 1px solid rgba(255,255,255,0.2); }
-        .tile.empty { background: #eee !important; cursor: default; }
+.card { 
+    height: 120px; /* Aumentamos de 80px a 120px */
+    width: 100%;
+    background: #333; 
+    cursor: pointer; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    border: 3px solid #fff; 
+    border-radius: 10px;
+    overflow: hidden; 
+    position: relative;
+    box-shadow: 4px 4px 0px rgba(0,0,0,0.5);
+}
+
+.card img { 
+    width: 100%; 
+    height: 100%; 
+    /* "contain" asegura que la imagen se vea completa sin recortarse */
+    object-fit: contain; 
+    background: #000; /* Fondo negro para rellenar si la imagen es alta */
+    display: none; 
+}
+
+.card span { 
+    display: none; 
+    font-size: 0.5rem; /* Letra más grande (era 0.25rem) */
+    padding: 10px;
+    text-align: center;
+    line-height: 1.2;
+    word-break: break-word; /* Para que nombres largos no se salgan */
+}
+
+.card.flipped img, .card.flipped span { 
+    display: block; 
+}
+
+        ##puzzle-grid { 
+    display: grid; 
+    grid-template-columns: repeat(3, 1fr); 
+    gap: 2px; 
+    width: 330px; /* Un poco más grande para mejor vista */
+    height: 330px; 
+    margin: 0 auto; 
+    border: 5px solid #000; 
+}
+        .tile { 
+    background-size: 330px 330px; /* Debe coincidir con el tamaño del grid */
+    cursor: pointer; 
+    border: 1px solid rgba(255,255,255,0.2); 
     </style>
 </head>
 <body>
@@ -319,7 +349,7 @@
             if(p !== 'empty') {
                 // Imagen de fondo y recorte (CSS background-position)
                 div.style.backgroundImage = `url('${url}')`;
-                div.style.backgroundPosition = `-${(p % 3) * 100}px -${Math.floor(p / 3) * 100}px`;
+               div.style.backgroundPosition = `-${(p % 3) * 110}px -${Math.floor(p / 3) * 110}px`;
                 
                 div.onclick = () => {
                     // Lógica de movimiento: verificar si la pieza clicada está adyacente al hueco
