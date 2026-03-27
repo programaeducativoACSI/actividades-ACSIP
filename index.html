@@ -86,7 +86,7 @@
 </head>
 <body>
 
-    <a href="index.html" id="btn-regresar" class="back-link">VOLVER</a>
+   <button id="btn-regresar" class="back-link" onclick="salirAExposicion()">VOLVER</button>
 
     <div id="main-menu">
         <h1 id="titulo-principal" style="font-size: 0.8rem;">DINÁMICAS MUSEO</h1>
@@ -102,21 +102,33 @@
             <input type="text" id="ansInput" placeholder="RESPUESTA...">
             <button class="btn-game" style="width: 100%;" onclick="checkAns()">VALIDAR</button>
             <button id="btn-next-hint" class="btn-game" style="width: 100%;" onclick="nextHint()">OTRA PISTA</button>
+            <div id="view-trivia" class="game-section">
+    <button class="btn-game" onclick="showHome()" style="font-size: 0.3rem; width: auto;">ATRÁS</button>
+    <div class="panel"> ... </div>
+</div>
         </div>
     </div>
 
     <div id="view-memory" class="game-section">
         <button class="btn-game" onclick="showHome()" style="font-size: 0.3rem; width: auto;">ATRÁS</button>
         <div id="memory-grid"></div>
+        <div id="view-trivia" class="game-section">
+    <button class="btn-game" onclick="showHome()" style="font-size: 0.3rem; width: auto;">ATRÁS</button>
+    <div class="panel"> ... </div>
+</div>
     </div>
 
     <div id="view-puzzle" class="game-section">
         <button class="btn-game" onclick="showHome()" style="font-size: 0.3rem; width: auto;">ATRÁS</button>
         <div id="puzzle-grid"></div>
+        <div id="view-trivia" class="game-section">
+    <button class="btn-game" onclick="showHome()" style="font-size: 0.3rem; width: auto;">ATRÁS</button>
+    <div class="panel"> ... </div>
+</div>
     </div>
 
 <script>
-    // 1. Enlace unificado (Hoja de Dinámicas)
+
     const URL_DINAMICAS = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSTPf6KsrFzsD6zY57ugk3fiqixmZKtIXauOM8x16xQZq-5gY_HzlNmM1EYk9QtnGmaBJQvQf3walml/pub?output=csv';
 
     let poolTrivia = [], poolMemory = [], poolPuzzle = [];
@@ -192,6 +204,16 @@
 
         } catch(e) { console.error("Error crítico de carga:", e); }
     }
+    function salirAExposicion() {
+    // Efecto de desvanecimiento para la ilusión de cierre
+    document.body.style.opacity = "0";
+    document.body.style.transition = "opacity 0.3s";
+
+    setTimeout(() => {
+        // Reemplaza la URL actual por la de la TV
+        window.location.replace("https://programaeducativoacsi.github.io/ACSI-expo/");
+    }, 300);
+}
 
     // FUNCIÓN DE CONVERSIÓN DE DRIVE (lh3 proxy - más robusto)
     function convertDriveLink(url) {
