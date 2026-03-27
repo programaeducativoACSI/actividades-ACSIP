@@ -257,6 +257,7 @@ function ocultarBotonVolver() {
 }
 
     function runTrivia() {
+        ocultarBotonVolver();
        if(poolTrivia.length === 0) return;
     curObj = poolTrivia[Math.floor(Math.random() * poolTrivia.length)];
     curHintIdx = 0;
