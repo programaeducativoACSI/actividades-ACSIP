@@ -69,25 +69,36 @@
     display: block; 
 }
 
-        ##puzzle-grid { 
+    #puzzle-grid { 
     display: grid; 
     grid-template-columns: repeat(3, 1fr); 
     gap: 2px; 
-    width: 330px; /* Un poco más grande para mejor vista */
+    width: 330px; 
     height: 330px; 
     margin: 0 auto; 
-    border: 5px solid #000; 
+    border: 5px solid #000;
+    background-color: #222; /* Fondo oscuro por si la imagen tarda en cargar */
 }
-        .tile { 
-    background-size: 330px 330px; /* Debe coincidir con el tamaño del grid */
+
+.tile { 
+    width: 110px; 
+    height: 110px;
+    /* Importante: el background-size DEBE ser igual al tamaño total del grid */
+    background-size: 330px 330px; 
+    background-repeat: no-repeat;
     cursor: pointer; 
-    border: 1px solid rgba(255,255,255,0.2); 
+    border: 1px solid rgba(255,255,255,0.1); 
+    box-sizing: border-box; /* Evita que el borde aumente el tamaño de la pieza */
+}
+
+.tile.empty { 
+    background: #eee !important; 
+    cursor: default; 
     </style>
 </head>
 <body>
 
-   <button id="btn-regresar" class="back-link" onclick="salirAExposicion()">VOLVER</button>
-
+ <button id="btn-regresar" class="back-link" onclick="salirAExposicion()">VOLVER</button>
     <div id="main-menu">
         <h1 id="titulo-principal" style="font-size: 0.8rem;">DINÁMICAS MUSEO</h1>
         <button class="btn-game" onclick="runTrivia()">1. ADIVINA</button>
@@ -232,22 +243,29 @@
         });
     }
 
-    function showHome() {
-        document.getElementById('main-menu').style.display = 'block';
-        document.querySelectorAll('.game-section').forEach(s => s.style.display = 'none');
-    }
+   function showHome() {
+    document.querySelectorAll('.game-section').forEach(s => s.style.display = 'none');
+    document.getElementById('main-menu').style.display = 'block';
+     
+    const btnVolver = document.getElementById('btn-regresar');
+    if(btnVolver) btnVolver.style.display = 'block';
+}
 
-    // --- JUEGO 1: TRIVIA (Adivina Personaje) ---
+function ocultarBotonVolver() {
+    const btnVolver = document.getElementById('btn-regresar');
+    if(btnVolver) btnVolver.style.display = 'none';
+}
+
     function runTrivia() {
-        if(poolTrivia.length === 0) return alert("No hay trivias cargadas.");
-        curObj = poolTrivia[Math.floor(Math.random() * poolTrivia.length)];
-        curHintIdx = 0;
-        document.getElementById('main-menu').style.display = 'none';
-        document.getElementById('view-trivia').style.display = 'block';
-        document.getElementById('hintBox').innerHTML = `PISTA 1:<br>${curObj.pistas[0]}`;
-        document.getElementById('ansInput').value = "";
-        applyInstructionColor(); // Aplicar color L2 al texto generado
-    }
+       if(poolTrivia.length === 0) return;
+    curObj = poolTrivia[Math.floor(Math.random() * poolTrivia.length)];
+    curHintIdx = 0;
+    document.getElementById('main-menu').style.display = 'none';
+    document.getElementById('view-trivia').style.display = 'block';
+    document.getElementById('hintBox').innerHTML = `PISTA 1:<br>${curObj.pistas[0]}`;
+    document.getElementById('ansInput').value = "";
+    applyColors();
+}
 
     function nextHint() {
         if(curHintIdx < curObj.pistas.length - 1) {
@@ -268,6 +286,7 @@
     let matchesFound = 0;
 
     function runMemory() {
+        ocultarBotonVolver();
         const grid = document.getElementById('memory-grid'); 
         grid.innerHTML = ''; 
         document.getElementById('main-menu').style.display = 'none';
@@ -344,6 +363,7 @@
     let puzzlePieces = [], emptyPieceIdx = 8;
 
     function runPuzzle() {
+        ocultarBotonVolver();
         if(poolPuzzle.length === 0) return alert("Sin imágenes de puzzle cargadas.");
         const grid = document.getElementById('puzzle-grid'); 
         grid.innerHTML = '';
