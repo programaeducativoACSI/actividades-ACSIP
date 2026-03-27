@@ -26,11 +26,28 @@
         input { width: 80%; padding: 10px; font-family: 'Press Start 2P'; font-size: 0.5rem; margin-bottom: 10px; }
         
         #memory-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-        .card { height: 80px; background: #333; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.25rem; border: 2px solid #fff; overflow: hidden; text-align: center; }
-        .card img { width: 100%; height: 100%; object-fit: cover; display: none; }
-        .card.flipped img { display: block; }
-        .card.flipped span { display: block; }
-        .card span { display: none; padding: 2px; }
+       .card { 
+            height: 90px; 
+            background: #333; /* Color de la carta "boca abajo" */
+            cursor: pointer; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            border: 2px solid #fff; 
+            overflow: hidden; 
+            position: relative;
+        }
+        .card img, .card span { 
+            display: none; /* Ocultos por defecto */
+        }
+        .card.flipped img, .card.flipped span { 
+            display: block; /* Se muestran al voltear */
+        }
+        .card span {
+            font-size: 0.25rem;
+            padding: 5px;
+            text-align: center;
+        }
 
         #puzzle-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; width: 300px; height: 300px; margin: 0 auto; border: 4px solid #000; }
         .tile { background-size: 300px 300px; cursor: pointer; border: 1px solid rgba(255,255,255,0.2); }
@@ -157,40 +174,82 @@
     }
 
     // --- LÓGICA MEMORAMA ---
-    let flipped = [], matches = 0;
+   let flipped = [], matches = 0;
+
     function runMemory() {
-        const grid = document.getElementById('memory-grid'); grid.innerHTML = '';
+        const grid = document.getElementById('memory-grid'); 
+        grid.innerHTML = ''; // Limpiamos el tablero
+        
         document.getElementById('main-menu').style.display = 'none';
         document.getElementById('view-memory').style.display = 'block';
-        flipped = []; matches = 0;
+        
+        flipped = []; 
+        matches = 0;
+
+        if (poolMemory.length < 3) {
+            return alert("Faltan datos en las columnas C y D del Excel para el Memorama.");
+        }
+        
         let sel = [...poolMemory].sort(() => 0.5 - Math.random()).slice(0, 3);
         let gameSet = [];
+
         sel.forEach(item => {
+            // Ambos elementos del par comparten el mismo 'val' (item.txt)
             gameSet.push({ val: item.txt, type: 'img', content: item.img });
-            gameSet.push({ val: item.txt, type: 'txt', content: item.txt });
+            gameSet.push({ id: item.txt, val: item.txt, type: 'txt', content: item.txt });
         });
+
         gameSet.sort(() => 0.5 - Math.random());
+
         gameSet.forEach(data => {
             const card = document.createElement('div');
-            card.className = 'card'; card.dataset.val = data.val;
-            card.innerHTML = data.type === 'img' ? `<img src="${data.content}">` : `<span>${data.content}</span>`;
+            card.className = 'card'; 
+            card.dataset.val = data.val; 
+            
+            if (data.type === 'img') {
+                card.innerHTML = `<img src="${data.content}" style="width:100%; height:100%; object-fit:cover;" onerror="this.src='https://via.placeholder.com/150?text=Error+Img'">`;
+            } else {
+                card.innerHTML = `<span>${data.content}</span>`;
+            }
+
             card.onclick = function() {
-                if(flipped.length < 2 && !this.classList.contains('flipped')) {
-                    this.classList.add('flipped'); flipped.push(this);
-                    if(flipped.length === 2) setTimeout(checkMem, 1000);
+                // Solo permitimos voltear si hay menos de 2 cartas volteadas y la actual no está volteada ni emparejada
+                if (flipped.length < 2 && !this.classList.contains('flipped') && this.style.visibility !== 'hidden') {
+                    this.classList.add('flipped'); 
+                    flipped.push(this);
+                    
+                    if (flipped.length === 2) {
+                        setTimeout(checkMem, 1000);
+                    }
                 }
             };
             grid.appendChild(card);
         });
-        applyColors();
+
+        // Aplicamos el color L2 de las instrucciones/pistas a los textos de las cartas
+        if (typeof applyColors === "function") applyColors();
     }
 
     function checkMem() {
-        if(flipped[0].dataset.val === flipped[1].dataset.val) {
-            flipped.forEach(c => c.style.visibility = 'hidden'); matches++;
-            if(matches === 3) { alert("¡MEMORAMA COMPLETADO!"); runMemory(); }
-        } else flipped.forEach(c => c.classList.remove('flipped'));
-        flipped = [];
+        const [card1, card2] = flipped;
+
+        // Comparamos el valor guardado en data-val
+        if (card1.dataset.val === card2.dataset.val) {
+            // ¡Es un match! Las ocultamos
+            card1.style.visibility = 'hidden'; 
+            card2.style.visibility = 'hidden'; 
+            matches++;
+            
+            if (matches === 3) { 
+                alert("¡MEMORAMA COMPLETADO! EXCELENTE MEMORIA."); 
+                runMemory(); // Reiniciamos con nuevos elementos
+            }
+        } else {
+            // No coinciden, las volteamos de nuevo
+            card1.classList.remove('flipped'); 
+            card2.classList.remove('flipped');
+        }
+        flipped = []; // Vaciamos la lista de volteadas
     }
 
     // --- LÓGICA PUZZLE ---
