@@ -5,146 +5,144 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title> - Dinámicas</title>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
-    <style>
-        body { 
-            margin: 0; padding: 20px; min-height: 100vh;
-            display: flex; flex-direction: column; align-items: center;
-            font-family: 'Press Start 2P', cursive; transition: background 0.5s;
-        }
-        #main-menu { text-align: center; margin-top: 40px; }
-        .game-section { display: none; width: 95%; max-width: 500px; text-align: center; margin-top: 20px; }
-        
-        .btn-game { 
-            display: block; width: 280px; margin: 15px auto; padding: 15px;
-            border: none; cursor: pointer; font-family: 'Press Start 2P';
-            font-size: 0.5rem; box-shadow: 4px 4px 0px #000;
-        }
-        .back-link { position: fixed; top: 20px; left: 20px; text-decoration: none; font-size: 0.6rem; padding: 15px; border-radius: 2px; }
-
-        .panel { border: 6px solid #000; padding: 20px; background: rgba(0,0,0,0.1); border-radius: 10px; }
-        #hintBox { font-size: 0.4rem; text-align: left; line-height: 1.8; margin-bottom: 15px; }
-        input { width: 80%; padding: 10px; font-family: 'Press Start 2P'; font-size: 0.5rem; margin-bottom: 10px; }
-        
-      #memory-grid { 
-    display: grid; 
-    grid-template-columns: repeat(3, 1fr); 
-    gap: 15px; 
-    padding: 10px;
-}
-
-.card { 
-    height: 120px; 
-    width: 100%;
-    background: #333; 
-    cursor: pointer; 
-    display: flex; 
-    align-items: center; 
-    justify-content: center; 
-    border: 3px solid #fff; 
-    border-radius: 10px;
-    overflow: hidden; 
-    position: relative;
-    box-shadow: 4px 4px 0px rgba(0,0,0,0.5);
-}
-
-.card img { 
-    width: 100%; 
-    height: 100%; 
+   <style>
+    body { 
+        margin: 0; padding: 20px; min-height: 100vh;
+        display: flex; flex-direction: column; align-items: center;
+        font-family: 'Press Start 2P', cursive; transition: background 0.5s;
+    }
+    #main-menu { text-align: center; margin-top: 40px; }
+    .game-section { display: none; width: 95%; max-width: 500px; text-align: center; margin-top: 20px; }
     
-    object-fit: contain; 
-    background: #000; 
-    display: none; 
-}
+    .btn-game { 
+        display: block; width: 280px; margin: 15px auto; padding: 15px;
+        border: none; cursor: pointer; font-family: 'Press Start 2P';
+        font-size: 0.5rem; box-shadow: 4px 4px 0px #000;
+    }
+    .back-link { position: fixed; top: 20px; left: 20px; text-decoration: none; font-size: 0.6rem; padding: 15px; border-radius: 2px; }
 
-.card span { 
-    display: none; 
-    font-size: 0.5rem; 
-    padding: 10px;
-    text-align: center;
-    line-height: 1.2;
-    word-break: break-word; 
-}
+    .panel { border: 6px solid #000; padding: 20px; background: rgba(0,0,0,0.1); border-radius: 10px; }
+    #hintBox { font-size: 0.4rem; text-align: left; line-height: 1.8; margin-bottom: 15px; }
+    input { width: 80%; padding: 10px; font-family: 'Press Start 2P'; font-size: 0.5rem; margin-bottom: 10px; }
+    
+    #memory-grid { 
+        display: grid; 
+        grid-template-columns: repeat(3, 1fr); 
+        gap: 15px; 
+        padding: 10px;
+    }
 
-.card.flipped img, .card.flipped span { 
-    display: block; 
-}
+    .card { 
+        height: 120px; 
+        width: 100%;
+        background: #333; 
+        cursor: pointer; 
+        display: flex; 
+        align-items: center; 
+        justify-content: center; 
+        border: 3px solid #fff; 
+        border-radius: 10px;
+        overflow: hidden; 
+        position: relative;
+        box-shadow: 4px 4px 0px rgba(0,0,0,0.5);
+    }
+
+    .card img { 
+        width: 100%; 
+        height: 100%; 
+        object-fit: contain; 
+        background: #000; 
+        display: none; 
+    }
+
+    .card span { 
+        display: none; 
+        font-size: 0.5rem; 
+        padding: 10px;
+        text-align: center;
+        line-height: 1.2;
+        word-break: break-word; 
+    }
+
+    .card.flipped img, .card.flipped span { 
+        display: block; 
+    }
 
     #puzzle-grid { 
-    display: grid; 
-    grid-template-columns: repeat(3, 1fr); 
-    gap: 2px; 
-    width: 330px; 
-    height: 330px; 
-    margin: 0 auto; 
-    border: 5px solid #000;
-    background-color: #222; 
-}
+        display: grid; 
+        grid-template-columns: repeat(3, 1fr); 
+        gap: 2px; 
+        width: 330px; 
+        height: 330px; 
+        margin: 0 auto; 
+        border: 5px solid #000;
+        background-color: #222; 
+    }
 
-.tile { 
-    width: 110px; 
-    height: 110px;
+    .tile { 
+        width: 110px; 
+        height: 110px;
+        background-size: 330px 330px; 
+        background-repeat: no-repeat;
+        cursor: pointer; 
+        border: 1px solid rgba(255,255,255,0.1); 
+        box-sizing: border-box; 
+    }
 
-    background-size: 330px 330px; 
-    background-repeat: no-repeat;
-    cursor: pointer; 
-    border: 1px solid rgba(255,255,255,0.1); 
-    box-sizing: border-box; 
-}
+    .tile.empty { 
+        background: #eee !important; 
+        cursor: default; 
+    } /* <--- AQUÍ ESTABA EL ERROR, YA ESTÁ CERRADO */
 
-.tile.empty { 
-    background: #eee !important; 
-    cursor: default; 
-    
-.victory-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.85); /* Fondo oscuro para resaltar el papiro */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 5000; /* Asegura que esté sobre todo */
-    backdrop-filter: blur(5px); /* Efecto de desenfoque de fondo */
-}
+    /* --- PANTALLA DE VICTORIA --- */
+    .victory-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.85); 
+        display: none; /* Inicia oculto, el JS lo cambia a 'flex' */
+        justify-content: center;
+        align-items: center;
+        z-index: 5000; 
+        backdrop-filter: blur(5px); 
+    }
 
-.papiro-container {
-    background-image: url('https://i.ibb.co/3W4T5Hj/papiro-fondo.png'); /* ENLACE DE EJEMPLO DE PAPIRO - CÁMBIALO POR EL TUYO SI GUSTAS */
-    background-size: 100% 100%;
-    background-repeat: no-repeat;
-    width: 90%;
-    max-width: 450px;
-    height: auto;
-    min-height: 300px;
-    padding: 40px;
-    text-align: center;
-    border-radius: 15px; /* Bordes ligeramente redondeados */
-    box-shadow: 10px 10px 0px rgba(0,0,0,0.5); /* Sombra retro */
-    display: flex;
-    flex-direction: column;
-    justify-content: space-around;
-    align-items: center;
-}
+    .papiro-container {
+        background-image: url('https://i.ibb.co/3W4T5Hj/papiro-fondo.png'); 
+        background-size: 100% 100%;
+        background-repeat: no-repeat;
+        width: 90%;
+        max-width: 450px;
+        height: auto;
+        min-height: 300px;
+        padding: 40px;
+        text-align: center;
+        border-radius: 15px; 
+        box-shadow: 10px 10px 0px rgba(0,0,0,0.5); 
+        display: flex;
+        flex-direction: column;
+        justify-content: space-around;
+        align-items: center;
+    }
 
+    .retro-title-red {
+        font-family: 'Press Start 2P', cursive;
+        color: #FF0000;
+        font-size: 0.6rem;
+        line-height: 1.4;
+        text-shadow: 2px 2px 0px #000; 
+        margin-bottom: 20px;
+    }
 
-.retro-title-red {
-    font-family: 'Press Start 2P', cursive;
-    color: #FF0000; /* Rojo puro */
-    font-size: 0.6rem;
-    line-height: 1.4;
-    text-shadow: 2px 2px 0px #000; /* Sombra negra para contraste */
-    margin-bottom: 20px;
-}
-
-
-.victory-text {
-    font-family: 'Press Start 2P', cursive;
-    font-size: 0.4rem;
-    line-height: 1.6;
-    margin-bottom: 30px;
-}
-    </style>
+    .victory-text {
+        font-family: 'Press Start 2P', cursive;
+        font-size: 0.4rem;
+        line-height: 1.6;
+        margin-bottom: 30px;
+    }
+</style>
 </head>
 <body>
 
@@ -205,12 +203,12 @@
     let poolTrivia = [], poolMemory = [], poolPuzzle = [];
     let curObj, curHintIdx = 0;
     let colorInstrucciones = "#ffffff";
+    let gameStarted = false; // Nueva bandera para evitar victoria automática en Puzzle
 
     async function init() {
         try {
             const res = await fetch(URL_DINAMICAS + '&cache=' + Date.now()); 
             const csv = await res.text();
-            
             const rows = csv.split(/\r?\n/).filter(r => r.trim() !== "").slice(1);
             const clean = (v) => v ? v.replace(/^"|"$/g, "").trim() : "";
 
@@ -237,28 +235,20 @@
             
             rows.forEach((row) => {
                 const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
-                
                 const pistaA = clean(cols[0]), respuestaB = clean(cols[1]);
                 if(respuestaB) {
                     let trivia = poolTrivia.find(x => x.res === respuestaB);
                     if(!trivia) { trivia = { res: respuestaB, pistas: [] }; poolTrivia.push(trivia); }
                     if(pistaA) trivia.pistas.push(pistaA);
                 }
-
                 const textoC = clean(cols[2]); 
                 const imagenD = convertDriveLink(clean(cols[3])); 
-
-                if(textoC && imagenD) {
-                    poolMemory.push({ txt: textoC, img: imagenD });
-                }
-
+                if(textoC && imagenD) poolMemory.push({ txt: textoC, img: imagenD });
                 const imagenE = convertDriveLink(clean(cols[4]));
                 if(imagenE) poolPuzzle.push(imagenE);
             });
 
-            console.log("Sistema Arcade Listo. Trivias:", poolTrivia.length, "Murales:", poolMemory.length);
             applyInstructionColor();
-
         } catch(e) { console.error("Error crítico de carga:", e); }
     }
 
@@ -279,7 +269,7 @@
     }
 
     function applyInstructionColor() {
-        const textos = document.querySelectorAll('#hintBox, .hint-text, .card span');
+        const textos = document.querySelectorAll('#hintBox, .hint-text, .card span, #victory-message');
         textos.forEach(t => {
             t.style.color = colorInstrucciones;
         });
@@ -290,6 +280,7 @@
         document.getElementById('main-menu').style.display = 'block';
         const btnVolver = document.getElementById('btn-regresar');
         if(btnVolver) btnVolver.style.display = 'block';
+        gameStarted = false;
     }
 
     function ocultarBotonVolver() {
@@ -297,6 +288,7 @@
         if(btnVolver) btnVolver.style.display = 'none';
     }
 
+    // --- DINÁMICA 1: TRIVIA ---
     function runTrivia() {
         ocultarBotonVolver();
         if(poolTrivia.length === 0) return;
@@ -318,13 +310,15 @@
     }
 
     function checkAns() {
-        if(document.getElementById('ansInput').value.trim().toLowerCase() === curObj.res.toLowerCase()) {
+        const userGuess = document.getElementById('ansInput').value.trim().toLowerCase();
+        if(userGuess === curObj.res.toLowerCase()) {
             mostrarPantallaLogro("¡EXCELENTE! <br> HAS ADIVINADO EL PERSONAJE.");
         } else {
             alert("INTENTA DE NUEVO");
         }
     }
 
+    // --- DINÁMICA 2: MEMORAMA ---
     let flippedCards = [];
     let matchesFound = 0;
 
@@ -341,25 +335,21 @@
 
         let selection = [...poolMemory].sort(() => 0.5 - Math.random()).slice(0, 3);
         let gameSet = [];
-
         selection.forEach(item => {
             gameSet.push({ id: item.txt, type: 'img', content: item.img });
             gameSet.push({ id: item.txt, type: 'txt', content: item.txt });
         });
-
         gameSet.sort(() => 0.5 - Math.random());
 
         gameSet.forEach(data => {
             const card = document.createElement('div');
             card.className = 'card';
             card.dataset.pairId = data.id; 
-            
             if (data.type === 'img') {
                 card.innerHTML = `<img src="${data.content}" onerror="this.src='https://via.placeholder.com/150?text=Error+Img'">`;
             } else {
                 card.innerHTML = `<span>${data.content}</span>`;
             }
-
             card.onclick = function() {
                 if (flippedCards.length < 2 && !this.classList.contains('flipped') && this.style.visibility !== 'hidden') {
                     this.classList.add('flipped');
@@ -388,6 +378,7 @@
         flippedCards = [];
     }
 
+    // --- DINÁMICA 3: PUZZLE ---
     let puzzlePieces = [], emptyPieceIdx = 8;
 
     function runPuzzle() {
@@ -399,8 +390,14 @@
         document.getElementById('view-puzzle').style.display = 'block';
         
         const img = poolPuzzle[Math.floor(Math.random() * poolPuzzle.length)];
-        puzzlePieces = [...Array(8).keys(), 'empty'].sort(() => 0.5 - Math.random());
+        
+        // Barajamos hasta que el puzzle NO esté resuelto al inicio
+        do {
+            puzzlePieces = [...Array(8).keys(), 'empty'].sort(() => 0.5 - Math.random());
+        } while (isPuzzleSolved());
+
         emptyPieceIdx = puzzlePieces.indexOf('empty');
+        gameStarted = true; // El juego empieza ahora
         drawPuzzle(img);
     }
 
@@ -419,8 +416,9 @@
                     if(i % 3 === 2) adyacentes[1] = -1;
                     if(adyacentes.includes(emptyPieceIdx)) {
                         [puzzlePieces[i], puzzlePieces[emptyPieceIdx]] = [puzzlePieces[emptyPieceIdx], puzzlePieces[i]];
-                        emptyPieceIdx = i; drawPuzzle(url);
-                        checkPuzzleWin();
+                        emptyPieceIdx = i; 
+                        drawPuzzle(url);
+                        if(gameStarted) checkPuzzleWin();
                     }
                 };
             }
@@ -428,23 +426,29 @@
         });
     }
 
-    function checkPuzzleWin() {
-        let win = true;
+    function isPuzzleSolved() {
         for (let i = 0; i < 8; i++) {
-            if (puzzlePieces[i] !== i) win = false;
+            if (puzzlePieces[i] !== i) return false;
         }
-        if (win) {
+        return true;
+    }
+
+    function checkPuzzleWin() {
+        if (isPuzzleSolved()) {
             mostrarPantallaLogro("¡MURAL RESTAURADO! <br> EXCELENTE TRABAJO.");
         }
     }
 
+    // --- SISTEMA DE LOGRO ---
     function mostrarPantallaLogro(customMessage) {
-        if (window.speechSynthesis) window.speechSynthesis.cancel(); 
+        stopAudioForce();
         const overlay = document.getElementById('victory-screen');
         const msgEl = document.getElementById('victory-message');
-        if(customMessage) msgEl.innerHTML = customMessage;
-        if(typeof colorInstrucciones !== 'undefined') msgEl.style.color = colorInstrucciones;
-        overlay.style.display = 'flex';
+        if(overlay && msgEl) {
+            msgEl.innerHTML = customMessage;
+            applyInstructionColor();
+            overlay.style.display = 'flex'; // Cambiamos a flex para mostrarlo
+        }
     }
 
     function regresarAlMenuArcade() {
