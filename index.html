@@ -3,150 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> - Dinámicas</title>
+    <title>Dinámicas - Museo</title>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
-   <style>
-    body { 
-        margin: 0; padding: 20px; min-height: 100vh;
-        display: flex; flex-direction: column; align-items: center;
-        font-family: 'Press Start 2P', cursive; transition: background 0.5s;
-    }
-    #main-menu { text-align: center; margin-top: 40px; }
-    .game-section { display: none; width: 95%; max-width: 500px; text-align: center; margin-top: 20px; }
-    
-    .btn-game { 
-        display: block; width: 280px; margin: 15px auto; padding: 15px;
-        border: none; cursor: pointer; font-family: 'Press Start 2P';
-        font-size: 0.5rem; box-shadow: 4px 4px 0px #000;
-    }
-    .back-link { position: fixed; top: 20px; left: 20px; text-decoration: none; font-size: 0.6rem; padding: 15px; border-radius: 2px; }
+    <style>
+        body { 
+            margin: 0; padding: 20px; min-height: 100vh;
+            display: flex; flex-direction: column; align-items: center;
+            font-family: 'Press Start 2P', cursive; transition: background 0.5s;
+        }
+        #main-menu { text-align: center; margin-top: 40px; }
+        .game-section { display: none; width: 95%; max-width: 500px; text-align: center; margin-top: 20px; }
+        
+        .btn-game { 
+            display: block; width: 280px; margin: 15px auto; padding: 15px;
+            border: none; cursor: pointer; font-family: 'Press Start 2P';
+            font-size: 0.5rem; box-shadow: 4px 4px 0px #000;
+        }
+        .back-link { position: fixed; top: 20px; left: 20px; text-decoration: none; font-size: 0.6rem; padding: 15px; border-radius: 2px; z-index: 100;}
 
-    .panel { border: 6px solid #000; padding: 20px; background: rgba(0,0,0,0.1); border-radius: 10px; }
-    #hintBox { font-size: 0.4rem; text-align: left; line-height: 1.8; margin-bottom: 15px; }
-    input { width: 80%; padding: 10px; font-family: 'Press Start 2P'; font-size: 0.5rem; margin-bottom: 10px; }
-    
-    #memory-grid { 
-        display: grid; 
-        grid-template-columns: repeat(3, 1fr); 
-        gap: 15px; 
-        padding: 10px;
-    }
+        .panel { border: 6px solid #000; padding: 20px; background: rgba(0,0,0,0.1); border-radius: 10px; }
+        #hintBox { font-size: 0.4rem; text-align: left; line-height: 1.8; margin-bottom: 15px; }
+        input { width: 80%; padding: 10px; font-family: 'Press Start 2P'; font-size: 0.5rem; margin-bottom: 10px; }
+        
+        #memory-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; padding: 10px; }
+        .card { height: 120px; width: 100%; background: #333; cursor: pointer; display: flex; align-items: center; justify-content: center; border: 3px solid #fff; border-radius: 10px; overflow: hidden; position: relative; box-shadow: 4px 4px 0px rgba(0,0,0,0.5); }
+        .card img { width: 100%; height: 100%; object-fit: contain; background: #000; display: none; }
+        .card span { display: none; font-size: 0.5rem; padding: 10px; text-align: center; line-height: 1.2; word-break: break-word; }
+        .card.flipped img, .card.flipped span { display: block; }
 
-    .card { 
-        height: 120px; 
-        width: 100%;
-        background: #333; 
-        cursor: pointer; 
-        display: flex; 
-        align-items: center; 
-        justify-content: center; 
-        border: 3px solid #fff; 
-        border-radius: 10px;
-        overflow: hidden; 
-        position: relative;
-        box-shadow: 4px 4px 0px rgba(0,0,0,0.5);
-    }
+        #puzzle-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; width: 330px; height: 330px; margin: 0 auto; border: 5px solid #000; background-color: #222; }
+        .tile { width: 110px; height: 110px; background-size: 330px 330px; background-repeat: no-repeat; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); box-sizing: border-box; }
+        .tile.empty { background: #eee !important; cursor: default; }
 
-    .card img { 
-        width: 100%; 
-        height: 100%; 
-        object-fit: contain; 
-        background: #000; 
-        display: none; 
-    }
-
-    .card span { 
-        display: none; 
-        font-size: 0.5rem; 
-        padding: 10px;
-        text-align: center;
-        line-height: 1.2;
-        word-break: break-word; 
-    }
-
-    .card.flipped img, .card.flipped span { 
-        display: block; 
-    }
-
-    #puzzle-grid { 
-        display: grid; 
-        grid-template-columns: repeat(3, 1fr); 
-        gap: 2px; 
-        width: 330px; 
-        height: 330px; 
-        margin: 0 auto; 
-        border: 5px solid #000;
-        background-color: #222; 
-    }
-
-    .tile { 
-        width: 110px; 
-        height: 110px;
-        background-size: 330px 330px; 
-        background-repeat: no-repeat;
-        cursor: pointer; 
-        border: 1px solid rgba(255,255,255,0.1); 
-        box-sizing: border-box; 
-    }
-
-    .tile.empty { 
-        background: #eee !important; 
-        cursor: default; 
-    } /* <--- AQUÍ ESTABA EL ERROR, YA ESTÁ CERRADO */
-
-    /* --- PANTALLA DE VICTORIA --- */
-    .victory-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.85); 
-        display: none; /* Inicia oculto, el JS lo cambia a 'flex' */
-        justify-content: center;
-        align-items: center;
-        z-index: 5000; 
-        backdrop-filter: blur(5px); 
-    }
-
-    .papiro-container {
-        background-image: url('https://i.ibb.co/3W4T5Hj/papiro-fondo.png'); 
-        background-size: 100% 100%;
-        background-repeat: no-repeat;
-        width: 90%;
-        max-width: 450px;
-        height: auto;
-        min-height: 300px;
-        padding: 40px;
-        text-align: center;
-        border-radius: 15px; 
-        box-shadow: 10px 10px 0px rgba(0,0,0,0.5); 
-        display: flex;
-        flex-direction: column;
-        justify-content: space-around;
-        align-items: center;
-    }
-
-    .retro-title-red {
-        font-family: 'Press Start 2P', cursive;
-        color: #FF0000;
-        font-size: 0.6rem;
-        line-height: 1.4;
-        text-shadow: 2px 2px 0px #000; 
-        margin-bottom: 20px;
-    }
-
-    .victory-text {
-        font-family: 'Press Start 2P', cursive;
-        font-size: 0.4rem;
-        line-height: 1.6;
-        margin-bottom: 30px;
-    }
-</style>
+        /* PANTALLA DE VICTORIA PAPIRO */
+        #victory-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 1000;
+        }
+        .papiro {
+            background: #f4e4bc; /* Color crema papiro */
+            background-image: url('https://www.transparenttextures.com/patterns/beige-paper.png');
+            padding: 40px; border: 2px solid #d4a373; border-radius: 5px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5); text-align: center; max-width: 80%;
+            border: 10px solid #8b5a2b; border-style: double;
+        }
+        .papiro h2 { color: #800000; font-size: 0.8rem; margin-bottom: 20px; }
+        .papiro p { color: #333; font-size: 0.5rem; line-height: 1.5; margin-bottom: 20px; }
+    </style>
 </head>
 <body>
 
- <button id="btn-regresar" class="back-link" onclick="salirAExposicion()">VOLVER</button>
+    <button id="btn-regresar" class="back-link" onclick="salirAExposicion()">VOLVER</button>
+    
     <div id="main-menu">
         <h1 id="titulo-principal" style="font-size: 0.8rem;">DINÁMICAS MUSEO</h1>
         <button class="btn-game" onclick="runTrivia()">1. ADIVINA</button>
@@ -161,40 +69,25 @@
             <input type="text" id="ansInput" placeholder="RESPUESTA...">
             <button class="btn-game" style="width: 100%;" onclick="checkAns()">VALIDAR</button>
             <button id="btn-next-hint" class="btn-game" style="width: 100%;" onclick="nextHint()">OTRA PISTA</button>
-            <div id="view-trivia" class="game-section">
-    <button class="btn-game" onclick="showHome()" style="font-size: 0.3rem; width: auto;">ATRÁS</button>
-    <div class="panel"> ... </div>
-</div>
         </div>
     </div>
 
     <div id="view-memory" class="game-section">
         <button class="btn-game" onclick="showHome()" style="font-size: 0.3rem; width: auto;">ATRÁS</button>
         <div id="memory-grid"></div>
-        <div id="view-trivia" class="game-section">
-    <button class="btn-game" onclick="showHome()" style="font-size: 0.3rem; width: auto;">ATRÁS</button>
-    <div class="panel"> ... </div>
-</div>
     </div>
 
     <div id="view-puzzle" class="game-section">
         <button class="btn-game" onclick="showHome()" style="font-size: 0.3rem; width: auto;">ATRÁS</button>
         <div id="puzzle-grid"></div>
-        <div id="view-trivia" class="game-section">
-    <button class="btn-game" onclick="showHome()" style="font-size: 0.3rem; width: auto;">ATRÁS</button>
-    <div class="panel"> ... </div>
-</div>
-        <div id="victory-screen" class="victory-overlay" style="display: none;">
-    <div class="papiro-container">
-        <div class="retro-title-red">¡LOGRO DESBLOQUEADO!</div>
-        
-        <div id="victory-message" class="victory-text">
-            ¡Felicidades! <br> Has completado la dinámica con éxito.
-        </div>
-        
-        <button class="btn-game" onclick="regresarAlMenuArcade()">MÁS JUEGOS</button>
     </div>
-</div>
+
+    <div id="victory-screen">
+        <div class="papiro">
+            <h2>¡LOGRO CONSEGUIDO!</h2>
+            <p id="victory-msg">Has completado la dinámica correctamente.</p>
+            <button class="btn-game" style="width: 100%;" onclick="showHome()">MENU PRINCIPAL</button>
+        </div>
     </div>
 
 <script>
@@ -203,7 +96,6 @@
     let poolTrivia = [], poolMemory = [], poolPuzzle = [];
     let curObj, curHintIdx = 0;
     let colorInstrucciones = "#ffffff";
-    let gameStarted = false; // Nueva bandera para evitar victoria automática en Puzzle
 
     async function init() {
         try {
@@ -211,12 +103,11 @@
             const csv = await res.text();
             const rows = csv.split(/\r?\n/).filter(r => r.trim() !== "").slice(1);
             const clean = (v) => v ? v.replace(/^"|"$/g, "").trim() : "";
-
             const cfg = rows[0].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
             
-            document.body.style.backgroundColor = clean(cfg[6]); // G2
+            document.body.style.backgroundColor = clean(cfg[6]);
             const titulo = document.getElementById('titulo-principal');
-            if(titulo) titulo.style.color = clean(cfg[7]); // H2
+            if(titulo) titulo.style.color = clean(cfg[7]);
             
             const colorTxtBtn = clean(cfg[8]);
             const colorBgBtn = clean(cfg[9]);
@@ -226,13 +117,10 @@
                 b.style.backgroundColor = colorBgBtn;
             });
 
-            const btnRegresar = document.getElementById('btn-regresar');
-            if(btnRegresar) btnRegresar.innerText = clean(cfg[10]) || "VOLVER";
-
+            if(document.getElementById('btn-regresar')) document.getElementById('btn-regresar').innerText = clean(cfg[10]) || "VOLVER";
             colorInstrucciones = clean(cfg[11]);
-            
+
             poolTrivia = []; poolMemory = []; poolPuzzle = [];
-            
             rows.forEach((row) => {
                 const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
                 const pistaA = clean(cols[0]), respuestaB = clean(cols[1]);
@@ -247,17 +135,8 @@
                 const imagenE = convertDriveLink(clean(cols[4]));
                 if(imagenE) poolPuzzle.push(imagenE);
             });
-
             applyInstructionColor();
         } catch(e) { console.error("Error crítico de carga:", e); }
-    }
-
-    function salirAExposicion() {
-        document.body.style.opacity = "0";
-        document.body.style.transition = "opacity 0.3s";
-        setTimeout(() => {
-            window.location.replace("https://programaeducativoacsi.github.io/ACSI-expo/");
-        }, 300);
     }
 
     function convertDriveLink(url) {
@@ -269,26 +148,26 @@
     }
 
     function applyInstructionColor() {
-        const textos = document.querySelectorAll('#hintBox, .hint-text, .card span, #victory-message');
-        textos.forEach(t => {
-            t.style.color = colorInstrucciones;
-        });
+        const textos = document.querySelectorAll('#hintBox, .hint-text, .card span');
+        textos.forEach(t => { t.style.color = colorInstrucciones; });
     }
 
     function showHome() {
+        document.getElementById('victory-screen').style.display = 'none';
         document.querySelectorAll('.game-section').forEach(s => s.style.display = 'none');
         document.getElementById('main-menu').style.display = 'block';
-        const btnVolver = document.getElementById('btn-regresar');
-        if(btnVolver) btnVolver.style.display = 'block';
-        gameStarted = false;
+        if(document.getElementById('btn-regresar')) document.getElementById('btn-regresar').style.display = 'block';
     }
 
     function ocultarBotonVolver() {
-        const btnVolver = document.getElementById('btn-regresar');
-        if(btnVolver) btnVolver.style.display = 'none';
+        if(document.getElementById('btn-regresar')) document.getElementById('btn-regresar').style.display = 'none';
     }
 
-    // --- DINÁMICA 1: TRIVIA ---
+    function mostrarVictoria(mensaje) {
+        document.getElementById('victory-msg').innerHTML = mensaje;
+        document.getElementById('victory-screen').style.display = 'flex';
+    }
+
     function runTrivia() {
         ocultarBotonVolver();
         if(poolTrivia.length === 0) return;
@@ -298,41 +177,30 @@
         document.getElementById('view-trivia').style.display = 'block';
         document.getElementById('hintBox').innerHTML = `PISTA 1:<br>${curObj.pistas[0]}`;
         document.getElementById('ansInput').value = "";
-        applyInstructionColor();
     }
 
     function nextHint() {
         if(curHintIdx < curObj.pistas.length - 1) {
             curHintIdx++;
             document.getElementById('hintBox').innerHTML += `<br><br>PISTA ${curHintIdx+1}:<br>${curObj.pistas[curHintIdx]}`;
-            applyInstructionColor(); 
+            applyInstructionColor();
         }
     }
 
     function checkAns() {
-        const userGuess = document.getElementById('ansInput').value.trim().toLowerCase();
-        if(userGuess === curObj.res.toLowerCase()) {
-            mostrarPantallaLogro("¡EXCELENTE! <br> HAS ADIVINADO EL PERSONAJE.");
-        } else {
-            alert("INTENTA DE NUEVO");
-        }
+        if(document.getElementById('ansInput').value.trim().toLowerCase() === curObj.res.toLowerCase()) {
+            mostrarVictoria("¡EXCELENTE!<br>Has adivinado correctamente.");
+        } else alert("INTENTA DE NUEVO");
     }
 
-    // --- DINÁMICA 2: MEMORAMA ---
-    let flippedCards = [];
-    let matchesFound = 0;
-
+    let flippedCards = [], matchesFound = 0;
     function runMemory() {
         ocultarBotonVolver();
-        const grid = document.getElementById('memory-grid'); 
-        grid.innerHTML = ''; 
+        const grid = document.getElementById('memory-grid'); grid.innerHTML = ''; 
         document.getElementById('main-menu').style.display = 'none';
         document.getElementById('view-memory').style.display = 'block';
-        flippedCards = []; 
-        matchesFound = 0;
-
-        if (poolMemory.length < 3) return alert("Se necesitan al menos 3 murales.");
-
+        flippedCards = []; matchesFound = 0;
+        if (poolMemory.length < 3) return alert("Faltan datos.");
         let selection = [...poolMemory].sort(() => 0.5 - Math.random()).slice(0, 3);
         let gameSet = [];
         selection.forEach(item => {
@@ -340,70 +208,46 @@
             gameSet.push({ id: item.txt, type: 'txt', content: item.txt });
         });
         gameSet.sort(() => 0.5 - Math.random());
-
         gameSet.forEach(data => {
             const card = document.createElement('div');
-            card.className = 'card';
-            card.dataset.pairId = data.id; 
-            if (data.type === 'img') {
-                card.innerHTML = `<img src="${data.content}" onerror="this.src='https://via.placeholder.com/150?text=Error+Img'">`;
-            } else {
-                card.innerHTML = `<span>${data.content}</span>`;
-            }
+            card.className = 'card'; card.dataset.pairId = data.id;
+            card.innerHTML = data.type === 'img' ? `<img src="${data.content}">` : `<span>${data.content}</span>`;
             card.onclick = function() {
-                if (flippedCards.length < 2 && !this.classList.contains('flipped') && this.style.visibility !== 'hidden') {
-                    this.classList.add('flipped');
-                    flippedCards.push(this);
+                if (flippedCards.length < 2 && !this.classList.contains('flipped')) {
+                    this.classList.add('flipped'); flippedCards.push(this);
                     if (flippedCards.length === 2) setTimeout(checkMem, 1000);
                 }
             };
             grid.appendChild(card);
         });
-        applyInstructionColor(); 
+        applyInstructionColor();
     }
 
     function checkMem() {
         const [card1, card2] = flippedCards;
         if (card1.dataset.pairId === card2.dataset.pairId) {
-            card1.style.visibility = 'hidden';
-            card2.style.visibility = 'hidden';
+            card1.style.visibility = 'hidden'; card2.style.visibility = 'hidden';
             matchesFound++;
-            if (matchesFound === 3) {
-                mostrarPantallaLogro("¡FANTÁSTICO! <br> HAS RELACIONADO TODAS LAS CARTAS."); 
-            }
-        } else {
-            card1.classList.remove('flipped');
-            card2.classList.remove('flipped');
-        }
+            if (matchesFound === 3) mostrarVictoria("¡FANTÁSTICO!<br>Has encontrado todos los pares.");
+        } else { card1.classList.remove('flipped'); card2.classList.remove('flipped'); }
         flippedCards = [];
     }
 
-    // --- DINÁMICA 3: PUZZLE ---
     let puzzlePieces = [], emptyPieceIdx = 8;
-
     function runPuzzle() {
         ocultarBotonVolver();
-        if(poolPuzzle.length === 0) return alert("Sin imágenes de puzzle.");
-        const grid = document.getElementById('puzzle-grid'); 
-        grid.innerHTML = '';
+        if(poolPuzzle.length === 0) return alert("Sin imágenes.");
+        const grid = document.getElementById('puzzle-grid'); grid.innerHTML = '';
         document.getElementById('main-menu').style.display = 'none';
         document.getElementById('view-puzzle').style.display = 'block';
-        
         const img = poolPuzzle[Math.floor(Math.random() * poolPuzzle.length)];
-        
-        // Barajamos hasta que el puzzle NO esté resuelto al inicio
-        do {
-            puzzlePieces = [...Array(8).keys(), 'empty'].sort(() => 0.5 - Math.random());
-        } while (isPuzzleSolved());
-
+        puzzlePieces = [...Array(8).keys(), 'empty'].sort(() => 0.5 - Math.random());
         emptyPieceIdx = puzzlePieces.indexOf('empty');
-        gameStarted = true; // El juego empieza ahora
         drawPuzzle(img);
     }
 
     function drawPuzzle(url) {
-        const grid = document.getElementById('puzzle-grid'); 
-        grid.innerHTML = '';
+        const grid = document.getElementById('puzzle-grid'); grid.innerHTML = '';
         puzzlePieces.forEach((p, i) => {
             const div = document.createElement('div');
             div.className = 'tile' + (p === 'empty' ? ' empty' : '');
@@ -416,9 +260,8 @@
                     if(i % 3 === 2) adyacentes[1] = -1;
                     if(adyacentes.includes(emptyPieceIdx)) {
                         [puzzlePieces[i], puzzlePieces[emptyPieceIdx]] = [puzzlePieces[emptyPieceIdx], puzzlePieces[i]];
-                        emptyPieceIdx = i; 
-                        drawPuzzle(url);
-                        if(gameStarted) checkPuzzleWin();
+                        emptyPieceIdx = i; drawPuzzle(url);
+                        checkPuzzleWin();
                     }
                 };
             }
@@ -426,38 +269,16 @@
         });
     }
 
-    function isPuzzleSolved() {
-        for (let i = 0; i < 8; i++) {
-            if (puzzlePieces[i] !== i) return false;
-        }
-        return true;
-    }
-
     function checkPuzzleWin() {
-        if (isPuzzleSolved()) {
-            mostrarPantallaLogro("¡MURAL RESTAURADO! <br> EXCELENTE TRABAJO.");
+        if (puzzlePieces.every((p, i) => p === 'empty' ? i === 8 : p === i)) {
+            mostrarVictoria("¡MURAL RESTAURADO!<br>Excelente trabajo.");
         }
     }
 
-    // --- SISTEMA DE LOGRO ---
-    function mostrarPantallaLogro(customMessage) {
-        stopAudioForce();
-        const overlay = document.getElementById('victory-screen');
-        const msgEl = document.getElementById('victory-message');
-        if(overlay && msgEl) {
-            msgEl.innerHTML = customMessage;
-            applyInstructionColor();
-            overlay.style.display = 'flex'; // Cambiamos a flex para mostrarlo
-        }
-    }
-
-    function regresarAlMenuArcade() {
-        document.getElementById('victory-screen').style.display = 'none';
-        showHome();
-    }
-
-    function stopAudioForce() {
-        if (window.speechSynthesis) window.speechSynthesis.cancel();
+    function salirAExposicion() {
+        document.body.style.opacity = "0";
+        document.body.style.transition = "opacity 0.3s";
+        setTimeout(() => { window.location.replace("https://programaeducativoacsi.github.io/ACSI-expo/"); }, 300);
     }
 
     window.onload = init;
