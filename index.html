@@ -33,7 +33,7 @@
 }
 
 .card { 
-    height: 120px; /* Aumentamos de 80px a 120px */
+    height: 120px; 
     width: 100%;
     background: #333; 
     cursor: pointer; 
@@ -50,19 +50,19 @@
 .card img { 
     width: 100%; 
     height: 100%; 
-    /* "contain" asegura que la imagen se vea completa sin recortarse */
+    
     object-fit: contain; 
-    background: #000; /* Fondo negro para rellenar si la imagen es alta */
+    background: #000; 
     display: none; 
 }
 
 .card span { 
     display: none; 
-    font-size: 0.5rem; /* Letra más grande (era 0.25rem) */
+    font-size: 0.5rem; 
     padding: 10px;
     text-align: center;
     line-height: 1.2;
-    word-break: break-word; /* Para que nombres largos no se salgan */
+    word-break: break-word; 
 }
 
 .card.flipped img, .card.flipped span { 
@@ -77,23 +77,73 @@
     height: 330px; 
     margin: 0 auto; 
     border: 5px solid #000;
-    background-color: #222; /* Fondo oscuro por si la imagen tarda en cargar */
+    background-color: #222; 
 }
 
 .tile { 
     width: 110px; 
     height: 110px;
-    /* Importante: el background-size DEBE ser igual al tamaño total del grid */
+
     background-size: 330px 330px; 
     background-repeat: no-repeat;
     cursor: pointer; 
     border: 1px solid rgba(255,255,255,0.1); 
-    box-sizing: border-box; /* Evita que el borde aumente el tamaño de la pieza */
+    box-sizing: border-box; 
 }
 
 .tile.empty { 
     background: #eee !important; 
     cursor: default; 
+    
+.victory-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.85); /* Fondo oscuro para resaltar el papiro */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 5000; /* Asegura que esté sobre todo */
+    backdrop-filter: blur(5px); /* Efecto de desenfoque de fondo */
+}
+
+.papiro-container {
+    background-image: url('https://i.ibb.co/3W4T5Hj/papiro-fondo.png'); /* ENLACE DE EJEMPLO DE PAPIRO - CÁMBIALO POR EL TUYO SI GUSTAS */
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    width: 90%;
+    max-width: 450px;
+    height: auto;
+    min-height: 300px;
+    padding: 40px;
+    text-align: center;
+    border-radius: 15px; /* Bordes ligeramente redondeados */
+    box-shadow: 10px 10px 0px rgba(0,0,0,0.5); /* Sombra retro */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+}
+
+
+.retro-title-red {
+    font-family: 'Press Start 2P', cursive;
+    color: #FF0000; /* Rojo puro */
+    font-size: 0.6rem;
+    line-height: 1.4;
+    text-shadow: 2px 2px 0px #000; /* Sombra negra para contraste */
+    margin-bottom: 20px;
+}
+
+
+.victory-text {
+    font-family: 'Press Start 2P', cursive;
+    font-size: 0.4rem;
+    line-height: 1.6;
+    margin-bottom: 30px;
+}
     </style>
 </head>
 <body>
@@ -135,6 +185,17 @@
         <div id="view-trivia" class="game-section">
     <button class="btn-game" onclick="showHome()" style="font-size: 0.3rem; width: auto;">ATRÁS</button>
     <div class="panel"> ... </div>
+</div>
+        <div id="victory-screen" class="victory-overlay" style="display: none;">
+    <div class="papiro-container">
+        <div class="retro-title-red">¡LOGRO DESBLOQUEADO!</div>
+        
+        <div id="victory-message" class="victory-text">
+            ¡Felicidades! <br> Has completado la dinámica con éxito.
+        </div>
+        
+        <button class="btn-game" onclick="regresarAlMenuArcade()">MÁS JUEGOS</button>
+    </div>
 </div>
     </div>
 
@@ -179,15 +240,13 @@
 
             
             colorInstrucciones = clean(cfg[11]);
-
             
-            // Limpiamos los pools antes de llenar para evitar duplicados si re-cargamos
             poolTrivia = []; poolMemory = []; poolPuzzle = [];
             
             rows.forEach((row, index) => {
                 const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
                 
-                // Mapeo Trivia (Col A=0 y Col B=1)
+                
                 const pistaA = clean(cols[0]), respuestaB = clean(cols[1]);
                 if(respuestaB) {
                     let trivia = poolTrivia.find(x => x.res === respuestaB);
@@ -226,7 +285,7 @@
     }, 300);
 }
 
-    // FUNCIÓN DE CONVERSIÓN DE DRIVE (lh3 proxy - más robusto)
+    
     function convertDriveLink(url) {
         if (!url || !url.includes('drive.google.com')) return url;
         let id = "";
@@ -272,17 +331,18 @@ function ocultarBotonVolver() {
         if(curHintIdx < curObj.pistas.length - 1) {
             curHintIdx++;
             document.getElementById('hintBox').innerHTML += `<br><br>PISTA ${curHintIdx+1}:<br>${curObj.pistas[curHintIdx]}`;
-            applyInstructionColor(); // Aplicar color L2 al texto nuevo
+            applyInstructionColor(); 
         }
     }
 
     function checkAns() {
         if(document.getElementById('ansInput').value.trim().toLowerCase() === curObj.res.toLowerCase()) {
-            alert("¡CORRECTO!"); runTrivia();
+            mostrarPantallaLogro("¡EXCELENTE! <br> HAS ADIVINADO EL PERSONAJE.");
+}
         } else alert("INTENTA DE NUEVO");
     }
 
-    // --- JUEGO 2: MEMORAMA (Pares Imagen vs Texto) ---
+    
     let flippedCards = [];
     let matchesFound = 0;
 
@@ -297,11 +357,11 @@ function ocultarBotonVolver() {
 
         if (poolMemory.length < 3) return alert("Se necesitan al menos 3 murales para el memorama (Col C y D).");
 
-        // 1. Seleccionamos 3 murales al azar
+      
         let selection = [...poolMemory].sort(() => 0.5 - Math.random()).slice(0, 3);
         let gameSet = [];
 
-        // 2. Creamos los pares mixtos (Imagen de Col D vs Texto de Col C)
+        
         selection.forEach(item => {
             // Ambos elementos del par comparten el mismo 'id' (item.txt) para comparar
             gameSet.push({ id: item.txt, type: 'img', content: item.img });
@@ -348,10 +408,10 @@ function ocultarBotonVolver() {
             card2.style.visibility = 'hidden';
             matchesFound++;
             
-            if (matchesFound === 3) {
-                alert("¡FANTÁSTICO! HAS RELACIONADO TODAS LAS OBRAS.");
-                runMemory(); // Reiniciamos con otros murales
-            }
+           if (matchesFound === 3) {
+    
+    mostrarPantallaLogro("¡FANTÁSTICO! <br> HAS RELACIONADO TODAS LAS CARTAS."); 
+}
         } else {
             // No coinciden, se dan la vuelta
             card1.classList.remove('flipped');
@@ -360,7 +420,7 @@ function ocultarBotonVolver() {
         flippedCards = [];
     }
 
-    // --- JUEGO 3: PUZZLE DESLIZANTE (Lógica background-position) ---
+   
     let puzzlePieces = [], emptyPieceIdx = 8;
 
     function runPuzzle() {
@@ -371,10 +431,10 @@ function ocultarBotonVolver() {
         document.getElementById('main-menu').style.display = 'none';
         document.getElementById('view-puzzle').style.display = 'block';
         
-        // Seleccionamos una imagen al azar de la Col E
+      
         const img = poolPuzzle[Math.floor(Math.random() * poolPuzzle.length)];
         
-        // Creamos array de posiciones (0-7 piezas, 8 es hueco)
+       
         puzzlePieces = [...Array(8).keys(), 'empty'].sort(() => 0.5 - Math.random());
         emptyPieceIdx = puzzlePieces.indexOf('empty');
         
@@ -386,27 +446,27 @@ function ocultarBotonVolver() {
         grid.innerHTML = '';
         puzzlePieces.forEach((p, i) => {
             const div = document.createElement('div');
-            // Si p es 'empty', la clase es 'tile empty', sino solo 'tile'
+           
             div.className = 'tile' + (p === 'empty' ? ' empty' : '');
             
             if(p !== 'empty') {
-                // Imagen de fondo y recorte (CSS background-position)
+                
                 div.style.backgroundImage = `url('${url}')`;
                div.style.backgroundPosition = `-${(p % 3) * 110}px -${Math.floor(p / 3) * 110}px`;
                 
                 div.onclick = () => {
-                    // Lógica de movimiento: verificar si la pieza clicada está adyacente al hueco
+                    
                     const adyacentes = [i-1, i+1, i-3, i+3];
-                    // Corrección de bordes (no saltar de fila en fila)
+                    
                     if(i % 3 === 0) adyacentes[0] = -1; // Izquierda prohibida
                     if(i % 3 === 2) adyacentes[1] = -1; // Derecha prohibida
                     
                     if(adyacentes.includes(emptyPieceIdx)) {
-                        // Intercambiamos posiciones en el array
+                       
                         [puzzlePieces[i], puzzlePieces[emptyPieceIdx]] = [puzzlePieces[emptyPieceIdx], puzzlePieces[i]];
                         emptyPieceIdx = i; drawPuzzle(url); // Re-dibujamos
                         
-                        // Verificar si se ganó
+                       
                         checkPuzzleWin();
                     }
                 };
@@ -422,12 +482,45 @@ function ocultarBotonVolver() {
             if (puzzlePieces[i] !== i) win = false;
         }
         if (win) {
-            alert("¡MURAL RESTAURADO! EXCELENTE TRABAJO.");
-            runPuzzle(); // Reiniciar con otra imagen
-        }
+    
+    mostrarPantallaLogro("¡MURAL RESTAURADO! <br> EXCELENTE TRABAJO.");
+}
     }
+  
+function mostrarPantallaLogro(customMessage) {
+    stopAudioForce(); // Detenemos audios previos
 
-    // Iniciamos la carga al abrir la página
+    const overlay = document.getElementById('victory-screen');
+    const msgEl = document.getElementById('victory-message');
+    
+    // Si pasamos un mensaje específico (ej. "¡MEMORAMA COMPLETADO!"), lo usamos.
+    if(customMessage) {
+        msgEl.innerHTML = customMessage;
+    } else {
+        msgEl.innerHTML = "¡Felicidades! <br> Has completado la dinámica con éxito.";
+    }
+    
+    // Aplicamos el color L2 de las instrucciones al texto de felicitación
+    if(typeof colorInstrucciones !== 'undefined') {
+        msgEl.style.color = colorInstrucciones;
+    } else {
+        msgEl.style.color = "#ffffff"; // Default por si acaso
+    }
+    
+    // Mostramos la pantalla
+    overlay.style.display = 'flex';
+}
+
+// Función del botón "MÁS JUEGOS"
+function regresarAlMenuArcade() {
+    // 1. Ocultamos la pantalla de victoria
+    document.getElementById('victory-screen').style.display = 'none';
+    
+    // 2. Regresamos al menú principal de juegos (usando tu función existente)
+    showHome();
+}
+
+    
     window.onload = init;
 </script>
 </body>
