@@ -200,7 +200,6 @@
     </div>
 
 <script>
-
     const URL_DINAMICAS = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSTPf6KsrFzsD6zY57ugk3fiqixmZKtIXauOM8x16xQZq-5gY_HzlNmM1EYk9QtnGmaBJQvQf3walml/pub?output=csv';
 
     let poolTrivia = [], poolMemory = [], poolPuzzle = [];
@@ -209,23 +208,18 @@
 
     async function init() {
         try {
-            
             const res = await fetch(URL_DINAMICAS + '&cache=' + Date.now()); 
             const csv = await res.text();
-            
             
             const rows = csv.split(/\r?\n/).filter(r => r.trim() !== "").slice(1);
             const clean = (v) => v ? v.replace(/^"|"$/g, "").trim() : "";
 
-            
             const cfg = rows[0].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
-            
             
             document.body.style.backgroundColor = clean(cfg[6]); // G2
             const titulo = document.getElementById('titulo-principal');
             if(titulo) titulo.style.color = clean(cfg[7]); // H2
             
-           
             const colorTxtBtn = clean(cfg[8]);
             const colorBgBtn = clean(cfg[9]);
             const btns = document.querySelectorAll('.btn-game, .control-btn, .back-btn, .back-link');
@@ -234,18 +228,15 @@
                 b.style.backgroundColor = colorBgBtn;
             });
 
-            
             const btnRegresar = document.getElementById('btn-regresar');
             if(btnRegresar) btnRegresar.innerText = clean(cfg[10]) || "VOLVER";
 
-            
             colorInstrucciones = clean(cfg[11]);
             
             poolTrivia = []; poolMemory = []; poolPuzzle = [];
             
-            rows.forEach((row, index) => {
+            rows.forEach((row) => {
                 const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
-                
                 
                 const pistaA = clean(cols[0]), respuestaB = clean(cols[1]);
                 if(respuestaB) {
@@ -254,8 +245,6 @@
                     if(pistaA) trivia.pistas.push(pistaA);
                 }
 
-                // *** MAPEO MEMORAMA REVISADO ***
-                // Col C (índice 2): TEXTO | Col D (índice 3): IMAGEN
                 const textoC = clean(cols[2]); 
                 const imagenD = convertDriveLink(clean(cols[3])); 
 
@@ -263,29 +252,24 @@
                     poolMemory.push({ txt: textoC, img: imagenD });
                 }
 
-                // Mapeo Puzzle (Col E=4)
                 const imagenE = convertDriveLink(clean(cols[4]));
                 if(imagenE) poolPuzzle.push(imagenE);
             });
 
             console.log("Sistema Arcade Listo. Trivias:", poolTrivia.length, "Murales:", poolMemory.length);
-            // Aplicamos color inicial a textos existentes
             applyInstructionColor();
 
         } catch(e) { console.error("Error crítico de carga:", e); }
     }
+
     function salirAExposicion() {
-    // Efecto de desvanecimiento para la ilusión de cierre
-    document.body.style.opacity = "0";
-    document.body.style.transition = "opacity 0.3s";
+        document.body.style.opacity = "0";
+        document.body.style.transition = "opacity 0.3s";
+        setTimeout(() => {
+            window.location.replace("https://programaeducativoacsi.github.io/ACSI-expo/");
+        }, 300);
+    }
 
-    setTimeout(() => {
-        // Reemplaza la URL actual por la de la TV
-        window.location.replace("https://programaeducativoacsi.github.io/ACSI-expo/");
-    }, 300);
-}
-
-    
     function convertDriveLink(url) {
         if (!url || !url.includes('drive.google.com')) return url;
         let id = "";
@@ -294,7 +278,6 @@
         return id ? `https://lh3.googleusercontent.com/d/${id}` : url;
     }
 
-    // Función para aplicar el color L2 a instrucciones y pistas
     function applyInstructionColor() {
         const textos = document.querySelectorAll('#hintBox, .hint-text, .card span');
         textos.forEach(t => {
@@ -302,30 +285,29 @@
         });
     }
 
-   function showHome() {
-    document.querySelectorAll('.game-section').forEach(s => s.style.display = 'none');
-    document.getElementById('main-menu').style.display = 'block';
-     
-    const btnVolver = document.getElementById('btn-regresar');
-    if(btnVolver) btnVolver.style.display = 'block';
-}
+    function showHome() {
+        document.querySelectorAll('.game-section').forEach(s => s.style.display = 'none');
+        document.getElementById('main-menu').style.display = 'block';
+        const btnVolver = document.getElementById('btn-regresar');
+        if(btnVolver) btnVolver.style.display = 'block';
+    }
 
-function ocultarBotonVolver() {
-    const btnVolver = document.getElementById('btn-regresar');
-    if(btnVolver) btnVolver.style.display = 'none';
-}
+    function ocultarBotonVolver() {
+        const btnVolver = document.getElementById('btn-regresar');
+        if(btnVolver) btnVolver.style.display = 'none';
+    }
 
     function runTrivia() {
         ocultarBotonVolver();
-       if(poolTrivia.length === 0) return;
-    curObj = poolTrivia[Math.floor(Math.random() * poolTrivia.length)];
-    curHintIdx = 0;
-    document.getElementById('main-menu').style.display = 'none';
-    document.getElementById('view-trivia').style.display = 'block';
-    document.getElementById('hintBox').innerHTML = `PISTA 1:<br>${curObj.pistas[0]}`;
-    document.getElementById('ansInput').value = "";
-    applyColors();
-}
+        if(poolTrivia.length === 0) return;
+        curObj = poolTrivia[Math.floor(Math.random() * poolTrivia.length)];
+        curHintIdx = 0;
+        document.getElementById('main-menu').style.display = 'none';
+        document.getElementById('view-trivia').style.display = 'block';
+        document.getElementById('hintBox').innerHTML = `PISTA 1:<br>${curObj.pistas[0]}`;
+        document.getElementById('ansInput').value = "";
+        applyInstructionColor();
+    }
 
     function nextHint() {
         if(curHintIdx < curObj.pistas.length - 1) {
@@ -338,11 +320,11 @@ function ocultarBotonVolver() {
     function checkAns() {
         if(document.getElementById('ansInput').value.trim().toLowerCase() === curObj.res.toLowerCase()) {
             mostrarPantallaLogro("¡EXCELENTE! <br> HAS ADIVINADO EL PERSONAJE.");
-}
-        } else alert("INTENTA DE NUEVO");
+        } else {
+            alert("INTENTA DE NUEVO");
+        }
     }
 
-    
     let flippedCards = [];
     let matchesFound = 0;
 
@@ -355,37 +337,30 @@ function ocultarBotonVolver() {
         flippedCards = []; 
         matchesFound = 0;
 
-        if (poolMemory.length < 3) return alert("Se necesitan al menos 3 murales para el memorama (Col C y D).");
+        if (poolMemory.length < 3) return alert("Se necesitan al menos 3 murales.");
 
-      
         let selection = [...poolMemory].sort(() => 0.5 - Math.random()).slice(0, 3);
         let gameSet = [];
 
-        
         selection.forEach(item => {
-            // Ambos elementos del par comparten el mismo 'id' (item.txt) para comparar
             gameSet.push({ id: item.txt, type: 'img', content: item.img });
             gameSet.push({ id: item.txt, type: 'txt', content: item.txt });
         });
 
-        // 3. Mezclamos las 6 cartas
         gameSet.sort(() => 0.5 - Math.random());
 
-        // 4. Creamos los elementos en el HTML
         gameSet.forEach(data => {
             const card = document.createElement('div');
             card.className = 'card';
-            card.dataset.pairId = data.id; // Atributo para comparar coincidencias
+            card.dataset.pairId = data.id; 
             
             if (data.type === 'img') {
-                // Pre-cargamos la imagen cononerror para manejo de links rotos
                 card.innerHTML = `<img src="${data.content}" onerror="this.src='https://via.placeholder.com/150?text=Error+Img'">`;
             } else {
                 card.innerHTML = `<span>${data.content}</span>`;
             }
 
             card.onclick = function() {
-                // Solo permitimos voltear si hay menos de 2 cartas volteadas y la actual no está volteada ni emparejada
                 if (flippedCards.length < 2 && !this.classList.contains('flipped') && this.style.visibility !== 'hidden') {
                     this.classList.add('flipped');
                     flippedCards.push(this);
@@ -394,50 +369,38 @@ function ocultarBotonVolver() {
             };
             grid.appendChild(card);
         });
-
-        applyInstructionColor(); // Aplicar color L2 a los textos ocultos de las cartas
+        applyInstructionColor(); 
     }
 
     function checkMem() {
         const [card1, card2] = flippedCards;
-        
-        // Comparamos el dataset.pairId (Nombre de la obra)
         if (card1.dataset.pairId === card2.dataset.pairId) {
-            // ¡Es un match! Las ocultamos
             card1.style.visibility = 'hidden';
             card2.style.visibility = 'hidden';
             matchesFound++;
-            
-           if (matchesFound === 3) {
-    
-    mostrarPantallaLogro("¡FANTÁSTICO! <br> HAS RELACIONADO TODAS LAS CARTAS."); 
-}
+            if (matchesFound === 3) {
+                mostrarPantallaLogro("¡FANTÁSTICO! <br> HAS RELACIONADO TODAS LAS CARTAS."); 
+            }
         } else {
-            // No coinciden, se dan la vuelta
             card1.classList.remove('flipped');
             card2.classList.remove('flipped');
         }
         flippedCards = [];
     }
 
-   
     let puzzlePieces = [], emptyPieceIdx = 8;
 
     function runPuzzle() {
         ocultarBotonVolver();
-        if(poolPuzzle.length === 0) return alert("Sin imágenes de puzzle cargadas.");
+        if(poolPuzzle.length === 0) return alert("Sin imágenes de puzzle.");
         const grid = document.getElementById('puzzle-grid'); 
         grid.innerHTML = '';
         document.getElementById('main-menu').style.display = 'none';
         document.getElementById('view-puzzle').style.display = 'block';
         
-      
         const img = poolPuzzle[Math.floor(Math.random() * poolPuzzle.length)];
-        
-       
         puzzlePieces = [...Array(8).keys(), 'empty'].sort(() => 0.5 - Math.random());
         emptyPieceIdx = puzzlePieces.indexOf('empty');
-        
         drawPuzzle(img);
     }
 
@@ -446,27 +409,17 @@ function ocultarBotonVolver() {
         grid.innerHTML = '';
         puzzlePieces.forEach((p, i) => {
             const div = document.createElement('div');
-           
             div.className = 'tile' + (p === 'empty' ? ' empty' : '');
-            
             if(p !== 'empty') {
-                
                 div.style.backgroundImage = `url('${url}')`;
-               div.style.backgroundPosition = `-${(p % 3) * 110}px -${Math.floor(p / 3) * 110}px`;
-                
+                div.style.backgroundPosition = `-${(p % 3) * 110}px -${Math.floor(p / 3) * 110}px`;
                 div.onclick = () => {
-                    
                     const adyacentes = [i-1, i+1, i-3, i+3];
-                    
-                    if(i % 3 === 0) adyacentes[0] = -1; // Izquierda prohibida
-                    if(i % 3 === 2) adyacentes[1] = -1; // Derecha prohibida
-                    
+                    if(i % 3 === 0) adyacentes[0] = -1;
+                    if(i % 3 === 2) adyacentes[1] = -1;
                     if(adyacentes.includes(emptyPieceIdx)) {
-                       
                         [puzzlePieces[i], puzzlePieces[emptyPieceIdx]] = [puzzlePieces[emptyPieceIdx], puzzlePieces[i]];
-                        emptyPieceIdx = i; drawPuzzle(url); // Re-dibujamos
-                        
-                       
+                        emptyPieceIdx = i; drawPuzzle(url);
                         checkPuzzleWin();
                     }
                 };
@@ -476,51 +429,33 @@ function ocultarBotonVolver() {
     }
 
     function checkPuzzleWin() {
-        // Verificamos si las piezas están en orden 0, 1, 2, ..., 7, 'empty'
         let win = true;
         for (let i = 0; i < 8; i++) {
             if (puzzlePieces[i] !== i) win = false;
         }
         if (win) {
-    
-    mostrarPantallaLogro("¡MURAL RESTAURADO! <br> EXCELENTE TRABAJO.");
-}
+            mostrarPantallaLogro("¡MURAL RESTAURADO! <br> EXCELENTE TRABAJO.");
+        }
     }
-  
-function mostrarPantallaLogro(customMessage) {
-    stopAudioForce(); // Detenemos audios previos
 
-    const overlay = document.getElementById('victory-screen');
-    const msgEl = document.getElementById('victory-message');
-    
-    // Si pasamos un mensaje específico (ej. "¡MEMORAMA COMPLETADO!"), lo usamos.
-    if(customMessage) {
-        msgEl.innerHTML = customMessage;
-    } else {
-        msgEl.innerHTML = "¡Felicidades! <br> Has completado la dinámica con éxito.";
+    function mostrarPantallaLogro(customMessage) {
+        if (window.speechSynthesis) window.speechSynthesis.cancel(); 
+        const overlay = document.getElementById('victory-screen');
+        const msgEl = document.getElementById('victory-message');
+        if(customMessage) msgEl.innerHTML = customMessage;
+        if(typeof colorInstrucciones !== 'undefined') msgEl.style.color = colorInstrucciones;
+        overlay.style.display = 'flex';
     }
-    
-    // Aplicamos el color L2 de las instrucciones al texto de felicitación
-    if(typeof colorInstrucciones !== 'undefined') {
-        msgEl.style.color = colorInstrucciones;
-    } else {
-        msgEl.style.color = "#ffffff"; // Default por si acaso
+
+    function regresarAlMenuArcade() {
+        document.getElementById('victory-screen').style.display = 'none';
+        showHome();
     }
-    
-    // Mostramos la pantalla
-    overlay.style.display = 'flex';
-}
 
-// Función del botón "MÁS JUEGOS"
-function regresarAlMenuArcade() {
-    // 1. Ocultamos la pantalla de victoria
-    document.getElementById('victory-screen').style.display = 'none';
-    
-    // 2. Regresamos al menú principal de juegos (usando tu función existente)
-    showHome();
-}
+    function stopAudioForce() {
+        if (window.speechSynthesis) window.speechSynthesis.cancel();
+    }
 
-    
     window.onload = init;
 </script>
 </body>
